@@ -1,0 +1,20 @@
+{
+  "install": {
+    "include": [
+      "^package\\.json$",
+      "^\\.env$"
+    ]
+  },
+  "restart": {
+    "exclude": [
+       "^app/"
+    ],
+    "include": [
+      "\\.json",
+      "webpack.config.js",
+      "server.js",
+      ".eslintrc"
+    ]
+  },
+  "throttle": 2000
+}
