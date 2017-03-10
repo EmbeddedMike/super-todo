@@ -1,39 +1,7 @@
-#Browsersync - Webpack + React Transform HMR
-
-## Installation/Usage:
-
-To try this example, follow these 4 simple steps. 
-
-**Step 1**: Clone this entire repo
-```bash
-$ git clone https://github.com/Browsersync/recipes.git bs-recipes
-```
-
-**Step 2**: Move into the directory containing this example
-```bash
-$ cd bs-recipes/recipes/webpack.react-transform-hmr
-```
-
-**Step 3**: Install dependencies
-```bash
-$ npm install
-```
-
-**Step 4**: Run the example
-```bash
-$ npm start
-```
-
-### Additional Info:
-
-To see `react-transform-hmr` in action, edit `js/HelloWorld.jsx`
-
-
-### Preview of `app.js`:
-```js
 /**
  * Require Browsersync along with webpack and middleware for it
  */
+var express = require("express");
 var browserSync = require('browser-sync');
 var webpack = require('webpack');
 var webpackDevMiddleware = require('webpack-dev-middleware');
@@ -48,10 +16,10 @@ var bundler = webpack(webpackConfig);
 /**
  * Run Browsersync and use middleware for Hot Module Replacement
  */
-browserSync({
+var bsConfig = {
     server: {
       baseDir: 'app',
-
+      ws: true,
       middleware: [
         webpackDevMiddleware(bundler, {
           // IMPORTANT: dev middleware can't access config, so we should
@@ -59,7 +27,7 @@ browserSync({
           publicPath: webpackConfig.output.publicPath,
 
           // pretty colored output
-          stats: { colors: true }
+          stats: { chunks: false }
 
           // for other settings see
           // http://webpack.github.io/docs/webpack-dev-middleware.html
@@ -67,6 +35,7 @@ browserSync({
 
         // bundler should be the same as above
         webpackHotMiddleware(bundler)
+        
       ]
     },
 
@@ -76,7 +45,33 @@ browserSync({
       'app/css/*.css',
       'app/*.html'
     ]
-});
+  
 
-```
+};
+const a = () => console.log("A");
+a()
+var bs = browserSync.create()
+const initted = function() {
+  console.log("SOCKETS"); 
 
+  var sock = bs.sockets;
+  
+  sock.on('connection', function (socket) {
+    var addedUser = false;
+    console.log("SOCKET connected~~~~")
+    socket.use(function(packet, next){
+      console.log(packet)
+      return next();
+    });
+    // console.log(socket)
+    // when the client emits 'new message', this listens and executes
+    socket.on('this', function (data) {
+      // we tell the client to execute 'new message'
+      console.log(data);
+    });
+    socket.emit("this", "to myself")
+  });
+};
+  // sock.on ("connect")
+
+bs.init(bsConfig,initted);
