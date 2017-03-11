@@ -11,7 +11,7 @@ module.exports = {
   entry: [
     'webpack/hot/dev-server',
     'webpack-hot-middleware/client',
-    path.join(__dirname, 'app/js/main')
+    path.join(__dirname, 'app/index.js')
   ],
   stats: {
     chunks: false,
@@ -41,6 +41,14 @@ module.exports = {
           test: /\.css$/,
           loader: 'style-loader!css-loader?modules&localIdentName=[name]---[local]---[hash:base64:5]'
       },
+      {
+    test: /\.json?$/,
+    loader: 'json-loader'
+},
+{
+    test: /\.scss$/,
+    loader: 'style-loader!css-loader?modules&localIdentName=[name]---[local]---[hash:base64:5]!sass-loader'
+},
     ]
   }
 };
