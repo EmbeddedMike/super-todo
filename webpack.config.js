@@ -4,7 +4,7 @@ var webpack = require('webpack');
 var path = require('path');
 
 module.exports = {
-  debug: true,
+  // debug: true,
   devtool: '#eval-source-map',
   context: path.join(__dirname, 'app', 'js'),
 
@@ -23,14 +23,14 @@ module.exports = {
   },
 
   plugins: [
-    new webpack.optimize.OccurenceOrderPlugin(),
+    // new webpack.optimize.OccurenceOrderPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoErrorsPlugin()
   ],
 
   module: {
     loaders: [
-      { test: /\.jsx?$/, exclude: /node_modules/, loaders: ['babel'] }
+      { test: /\.jsx?$/, exclude: /node_modules/, loaders: ['babel-loader'] }
     ]
   }
 };

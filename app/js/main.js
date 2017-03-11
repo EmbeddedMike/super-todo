@@ -4,4 +4,4 @@ import { render } from 'react-dom';
 // because in that case it will do full page reload on change
 import HelloWorld from './HelloWorld.jsx';
 
-render(<HelloWorld />, document.getElementById('react-root'));
+render(<HelloWorld />, document.getElementById('root'));

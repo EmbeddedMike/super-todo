@@ -1,5 +1,27 @@
 import React, { Component } from 'react';
-let label = "THIS LABEL"
+//Test the socket connection
+const managers = window.___browserSync___.io.managers;
+
+//The first manager is the one that BrowserSync uses
+
+const man1 = managers[Object.keys(managers)[0]];
+
+//The socket that BrowserSync uses is the first entry in the connecting array
+const sock = man1.connecting[0];
+
+//So now let's emit data
+sock.emit("test", "This is a new socket test");
+sock.on("ack", (data) =>{
+  console.log("ACK")
+  console.log(data);
+});
+const sock2 = man1.socket("altspace")
+sock2.connect()
+sock.emit("test", `Socket connected ${sock.connected}`)
+sock.emit("test", `Socket2 connected ${sock2.connected}`)
+sock.send("message", "more stuff");
+
+let label = "THIS LABEL";
 // const io = require("socket.io-client");
 // window.io = io;
 
@@ -27,7 +49,7 @@ export default class HelloWorld extends Component {
 
   render() {
     // Play with it...
-    const name = 'World';
+    const name = 'Worldlyness';
 
     return (
     <div>

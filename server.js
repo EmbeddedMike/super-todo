@@ -35,7 +35,7 @@ var bsConfig = {
 
         // bundler should be the same as above
         webpackHotMiddleware(bundler)
-        
+
       ]
     },
 
@@ -45,31 +45,39 @@ var bsConfig = {
       'app/css/*.css',
       'app/*.html'
     ]
-  
+
 
 };
 const a = () => console.log("A");
 a()
 var bs = browserSync.create()
 const initted = function() {
-  console.log("SOCKETS"); 
+  console.log("SOCKETS");
 
   var sock = bs.sockets;
-  
+  sock.on('test', (data) => console.log("GOT TEST"));
   sock.on('connection', function (socket) {
     var addedUser = false;
     console.log("SOCKET connected~~~~")
+    socket.on('message', function (data, body) {
+      // we tell the client to execute 'new message'
+      console.log("got a message " + data);
+    });
+
+    socket.on('test', function (data) {
+      // we tell the client to execute 'new message'
+      console.log("got test ")
+      socket.emit("ack", "Test ack");
+    });
     socket.use(function(packet, next){
       console.log(packet)
+      socket.emit("ack", "This is an ack");
       return next();
     });
     // console.log(socket)
     // when the client emits 'new message', this listens and executes
-    socket.on('this', function (data) {
-      // we tell the client to execute 'new message'
-      console.log(data);
-    });
-    socket.emit("this", "to myself")
+
+
   });
 };
   // sock.on ("connect")
