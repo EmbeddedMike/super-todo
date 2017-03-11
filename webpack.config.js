@@ -9,6 +9,7 @@ module.exports = {
   // context: path.join(__dirname, 'app', 'js'),
 
   entry: [
+    'react-hot-loader/patch',
     'webpack/hot/dev-server',
     'webpack-hot-middleware/client',
     path.join(__dirname, 'app/index.js')
@@ -31,7 +32,7 @@ module.exports = {
     // new
     // new webpack.optimize.OccurenceOrderPlugin(),
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoErrorsPlugin()
+    new webpack.NoEmitOnErrorsPlugin()
   ],
 
   module: {

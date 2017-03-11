@@ -18,14 +18,19 @@ class SyncInput extends Component {
     componentWillUnmount() {
         this.clearTimer();
     }
+    clearTimer() {
+      if( this.timer ){
+        console.log("Clear timer");
+        clearInterval(this.timer);
+        this.timer = null;
+      }
+    }
     fixTimer() {
         console.log('Timer check: ' + this.state.hack);
+        this.clearTimer(); /*clear if set*/
         if(this.hack) {
             console.log('Timer set');
             this.timer = setInterval(this.timerProc.bind(this), 1000);
-        } else {
-            clearInterval(this.timer);
-            console.log('Timer cleared!');
         }
     }
     timerProc() {
