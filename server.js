@@ -13,9 +13,26 @@ var webpackHotMiddleware = require('webpack-hot-middleware');
 var webpackConfig = require('./webpack.config');
 var bundler = webpack(webpackConfig);
 
+
+
+// Do "hot-reloading" of express stuff on the server
+// Throw away cached modules and re-require next time
+// Ensure there's no important state in there!
+chokidar = require('chokidar');
+const watcher = chokidar.watch('./server');
+
+watcher.on('ready', function() {
+  watcher.on('all', function() {
+    console.log("Clearing /server/ module cache from server");
+    Object.keys(require.cache).forEach(function(id) {
+      if (/[\/\\]server[\/\\]/.test(id)) delete require.cache[id];
+    });
+  });
+});
 /**
  * Run Browsersync and use middleware for Hot Module Replacement
  */
+
 var bsConfig = {
     server: {
       baseDir: 'app',
@@ -34,17 +51,26 @@ var bsConfig = {
         }),
 
         // bundler should be the same as above
-        webpackHotMiddleware(bundler)
+        webpackHotMiddleware(bundler),
+        //this is a hot reloaded middleware
+        {
+          route: "/api", // per-route
+          handle: function (req, res, next) {
+            console.log("API Route hit");
+            require("./server/app.js")(req,res,next);
 
+              // handle any requests at /api
+          }
+        }
       ]
     },
 
     // no need to watch '*.js' here, webpack will take care of it for us,
     // including full page reloads if HMR won't work
-    files: [
-      'app/css/*.css',
-      'app/*.html'
-    ]
+    // files: [
+    //   'app/css/*.css',
+    //   'app/*.html'
+    // ]
 
 
 };
@@ -74,7 +100,7 @@ const initted = function() {
       socket.emit("ack", "This is an ack");
       return next();
     });
-    // console.log(socket)
+    // console.log(s  ocket)
     // when the client emits 'new message', this listens and executes
 
 
