@@ -18,17 +18,9 @@ var bundler = webpack(webpackConfig);
 // Do "hot-reloading" of express stuff on the server
 // Throw away cached modules and re-require next time
 // Ensure there's no important state in there!
-chokidar = require('chokidar');
-const watcher = chokidar.watch('./server');
+var debounce = require('debounce');
 
-watcher.on('ready', function() {
-  watcher.on('all', function() {
-    console.log("Clearing /server/ module cache from server");
-    Object.keys(require.cache).forEach(function(id) {
-      if (/[\/\\]server[\/\\]/.test(id)) delete require.cache[id];
-    });
-  });
-});
+
 /**
  * Run Browsersync and use middleware for Hot Module Replacement
  */
@@ -36,6 +28,28 @@ watcher.on('ready', function() {
  const allMiddleware = (req,res,next) => {
   require("./server/all.js")(bs,req,res,next)
   }
+const chokidar = require('chokidar');
+const watcher = chokidar.watch('./server');
+let clearCache = (mode, id) => {
+  console.log("Clearing /server/ module cache from server :" + id);
+  const resolved = require.resolve("./" +id);
+  let module;
+  if (require.cache[resolved]){
+    module = require(resolved);
+    if (module.deregister ) module.deregister()
+    delete require.cache[resolved];
+  }
+  module = require(resolved);
+  if (module.register ) module.register(bs)
+  // Object.keys(require.cache).forEach(function(id) {
+  //   if (/[\/\\]server[\/\\]/.test(id)) delete require.cache[id];
+  // });
+};
+clearCache = debounce(clearCache,2000,true); /*change on leading edge*/
+
+watcher.on('ready', function() {
+  watcher.on('all', clearCache);
+});
 
 
 var bsConfig = {
