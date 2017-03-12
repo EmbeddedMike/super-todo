@@ -32,6 +32,11 @@ watcher.on('ready', function() {
 /**
  * Run Browsersync and use middleware for Hot Module Replacement
  */
+ var bs = browserSync.create()
+ const allMiddleware = (req,res,next) => {
+  require("./server/all.js")(bs,req,res,next)
+  }
+
 
 var bsConfig = {
     server: {
@@ -53,14 +58,16 @@ var bsConfig = {
         // bundler should be the same as above
         webpackHotMiddleware(bundler),
         //this is a hot reloaded middleware
+        allMiddleware,
         {
           route: "/api", // per-route
           handle: function (req, res, next) {
             console.log("API Route hit");
-            require("./server/app.js")(req,res,next);
+            require("./server/app.js")(bs,req,res,next);
 
               // handle any requests at /api
           }
+
         }
       ]
     },
@@ -74,9 +81,7 @@ var bsConfig = {
 
 
 };
-const a = () => console.log("A");
-a()
-var bs = browserSync.create()
+
 const initted = function() {
   console.log("SOCKETS");
 
