@@ -18,7 +18,7 @@ var bundler = webpack(webpackConfig);
 // Do "hot-reloading" of express stuff on the server
 // Throw away cached modules and re-require next time
 // Ensure there's no important state in there!
-var debounce = require('debounce');
+var throttle = require('throttle-debounce/throttle');
 
 
 /**
@@ -34,18 +34,26 @@ let clearCache = (mode, id) => {
   console.log("Clearing /server/ module cache from server :" + id);
   const resolved = require.resolve("./" +id);
   let module;
+  let state;
   if (require.cache[resolved]){
     module = require(resolved);
-    if (module.deregister ) module.deregister()
+    if (module.deregister ) state = module.deregister()
     delete require.cache[resolved];
   }
-  module = require(resolved);
-  if (module.register ) module.register(bs)
-  // Object.keys(require.cache).forEach(function(id) {
-  //   if (/[\/\\]server[\/\\]/.test(id)) delete require.cache[id];
-  // });
+  state = state ? state : {}
+  try{
+    module = require(resolved);
+    if (module.register ) module.register(bs, state)
+  }
+  catch (e){
+    console.log(e)
+  }
+
 };
-clearCache = debounce(clearCache,2000,true); /*change on leading edge*/
+
+const delay = process.env.PROJECT_NAME ? 2000 : 20
+
+clearCache = throttle(delay, false, clearCache );
 
 watcher.on('ready', function() {
   watcher.on('all', clearCache);
@@ -72,17 +80,9 @@ var bsConfig = {
         // bundler should be the same as above
         webpackHotMiddleware(bundler),
         //this is a hot reloaded middleware
-        allMiddleware,
-        {
-          route: "/api", // per-route
-          handle: function (req, res, next) {
-            console.log("API Route hit");
-            require("./server/app.js")(bs,req,res,next);
+        allMiddleware
 
-              // handle any requests at /api
-          }
 
-        }
       ]
     },
 
