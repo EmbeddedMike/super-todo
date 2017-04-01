@@ -40,7 +40,8 @@ module.exports = {
       { test: /\.jsx?$/, exclude: /node_modules/, loaders: ['babel-loader'] },
       {
           test: /\.css$/,
-          loader: 'style-loader!css-loader?modules&localIdentName=[name]---[local]---[hash:base64:5]'
+          // loader: 'style-loader!css-loader?modules&localIdentName=[name]---[local]---[hash:base64:5]'
+          loader: 'style-loader!css-loader'
       },
       {
     test: /\.json?$/,
