@@ -1,10 +1,10 @@
 const React = require('react');
 const CodeMirror = require('react-codemirror');
 require('codemirror/lib/codemirror.css');
-const CM = React.createClass({
+const CMEditor = React.createClass({
 	getInitialState: function() {
 		return {
-			code: "// Code",
+			code: "// Codexxx",
 		};
 	},
 	updateCode: function(newCode) {
@@ -21,4 +21,4 @@ const CM = React.createClass({
 });
 
 
-export default CM;
+export default CMEditor;
