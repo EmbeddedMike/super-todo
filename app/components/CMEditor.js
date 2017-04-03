@@ -12,10 +12,17 @@ class CMEditor extends React.Component{
 			code: newCode,
 		});
 	}
+	componentDidMount(){
+		console.log("Did Mount")
+	}
+	componentWillUnMount(){
+		console.log("Unmounting")
+	}
 	render() {
 		var options = {
 			lineNumbers: true,
 		};
+		console.log("Render")
 		return <CodeMirror value={this.state.code} onChange={this.updateCode.bind(this)} options={options} />
 	}
 };
