@@ -1,7 +1,7 @@
 const React = require('react');
 const CodeMirror = require('react-codemirror');
 require('codemirror/lib/codemirror.css');
-class CMEditor extends React.Component{
+class GDTEditor extends React.Component{
 	constructor(props) {
 		super(props);
 		this.state = {code: "//Test"}
@@ -28,4 +28,4 @@ class CMEditor extends React.Component{
 };
 
 
-export default CMEditor;
+export default GDTEditor;
