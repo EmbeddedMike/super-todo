@@ -4,17 +4,12 @@
 
 * Order new bathroom fan timer
 # Waiting
-Check size for awning
-Order sundowner
-https://www.sunsetterflagpole.com/costconew/order_awning.asp?model=m&extpromo=U
-John Greenland (jsgjnr@gmail.com)
-Costco member #111843593497
-John • Tue, 6:11 PM
+
 * Share Doc with JSG
 * Cancel Hulu @1May2017
 
 ## Email
-* Reach to Tim Selly 
+* Reach to Tim Seely 
 
 # Projects
 ### dev.ed
@@ -210,3 +205,9 @@ Upgrade Linux
 * [Push to super-todo](https://github.com/EmbeddedMike/super-todo) #done
 * Look up BH school folks #done
 * Cancel Hulu #done
+Check size for awning
+Order sundowner
+https://www.sunsetterflagpole.com/costconew/order_awning.asp?model=m&extpromo=U
+John Greenland (jsgjnr@gmail.com)
+Costco member #111843593497
+John • Tue, 6:11 PM
