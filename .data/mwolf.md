@@ -1,16 +1,18 @@
 # IN
-
+#### refactor server for hot reloading       
 # Projects
 #### stuff
 
 ## ToDo
-#### Change old todo list to Markdown #done
-#### Clean unnecessary code
-#### [Push to super-todo](https://github.com/EmbeddedMike/super-todo)
-#### add  current todo list to local storage
-#### server to store todo list in .data
+#### push to glitch #done
+#### todolist persists on server:
+##### 1. Server to get todo list from .data
+##### 2. client to request todolist from server
+##### 3. client to push todolist to server
+##### 4. and server to store todo list in .data
+#### commit and push to glitch again
+#### add  current todo list to local storage #
 #### add MoveUp/Down and Mark Done keys
-#### push to glitch. That will give me a project that I can work on, online.
 #### create a REST interface so that I can push/pull the list from glitch. That will let me work from all devices.
 #### add hook to process last/next line
 #### Add markdown package
@@ -174,3 +176,6 @@ Recover home drive
 Publish VS Code Example
 Blog requirements for GTD app
 Upgrade Linux
+#### Change old todo list to Markdown #done
+#### Clean unnecessary code #done
+#### [Push to super-todo](https://github.com/EmbeddedMike/super-todo) #done

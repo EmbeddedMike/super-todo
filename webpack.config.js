@@ -39,7 +39,7 @@ module.exports = {
     loaders: [
       { test: /\.jsx?$/, 
         include: [/app/],
-        
+        exclude: /(node_modules|bower_components)/,
         loaders: ['babel-loader'] },
       {
           test: /\.css$/,

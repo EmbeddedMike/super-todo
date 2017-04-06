@@ -95,7 +95,12 @@ var bsConfig = {
 
 
 };
+const path = require("path");
+const fsp = require("fs-promise");
 
+const readTodoList = (name) => {
+  return fsp.readFile(path.join(".data", name + ".md")).then(contents => contents.toString());
+}
 const initted = function() {
   console.log("SOCKETS");
 
@@ -107,6 +112,8 @@ const initted = function() {
     socket.on('message', function (data, body) {
       // we tell the client to execute 'new message'
       console.log("got a message " + data);
+      readTodoList("mwolf").then(
+         list => socket.send("todo","THIS IS THE list" ));
     });
 
     socket.on('test', function (data) {
