@@ -27,7 +27,8 @@ var throttle = require('throttle-debounce/throttle');
  var bs = browserSync.create()
  const allMiddleware = (req,res,next) => {
   require("./server/all.js")(bs,req,res,next)
-  }
+}
+
 const chokidar = require('chokidar');
 const watcher = chokidar.watch('./server');
 let clearCache = (mode, id) => {
@@ -101,34 +102,30 @@ const fsp = require("fs-promise");
 const readTodoList = (name) => {
   return fsp.readFile(path.join(".data", name + ".md")).then(contents => contents.toString());
 }
+const socketCode = () => {
+  require("./server/socket.js")(bs,req,res,next)
+  }
 const initted = function() {
-  console.log("SOCKETS");
-
+  // socketCode()
+  console.log("Initializing");
+  state = {}
+  state.seq = 0;
+  let connections = {}
   var sock = bs.sockets;
-  sock.on('test', (data) => console.log("GOT TEST"));
   sock.on('connection', function (socket) {
-    var addedUser = false;
-    console.log("SOCKET connected~~~~")
-    socket.on('message', function (data, body) {
+    state.seq++;
+    let id = "Session " + state.seq
+    console.log(`Session ${id} connected~~~~`)
+    socket.send("id", id);
+    socket.on('message', function (type, body) {
       // we tell the client to execute 'new message'
-      console.log("got a message " + data);
-      readTodoList("mwolf").then(
-         list => socket.send("todo","THIS IS THE list" ));
-    });
-
-    socket.on('test', function (data) {
-      // we tell the client to execute 'new message'
-      console.log("got test ")
-      socket.emit("ack", "Test ack");
-    });
-    socket.use(function(packet, next){
-      console.log(packet)
-      socket.emit("ack", "This is an ack");
-      return next();
-    });
-    // console.log(s  ocket)
-    // when the client emits 'new message', this listens and executes
-
+      console.log("got a message " + type);
+      if( type === "getTodo"){
+        socket.send("id", id);
+        readTodoList("mwolf").then(
+          list => socket.send("todo","THIS IS THE list" ));
+      }
+      });
 
   });
 };

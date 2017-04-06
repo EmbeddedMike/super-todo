@@ -10,13 +10,12 @@ const man1 = managers[Object.keys(managers)[0]];
 const sock = man1.connecting[0];
 
 //So now let's emit data
-sock.emit("test", "This is a new socket test");
 
 // const sock2 = man1.socket("altspace")
 // sock2.connect("connect payload")
 // sock.emit("test", `Socket connected ${sock.connected}`)
 // sock.emit("test", `Socket2 connected ${sock2.connected}`)
-sock.send("something that is not a message", "more stuff");
+// sock.send("something that is really ng that is not a message", "more stuff");
 
 let label = "THIS LABEL";
 // const io = require("socket.io-client");
@@ -31,8 +30,7 @@ let label = "THIS LABEL";
 let hasBeenSetup = false; //Reset when module reloads
 
 let setupCB = (_this) => {
-  
-  if (hasBeenSetup) return;
+  if (hasBeenSetup) return; 
   //Release old callback, if it exists
   console.log("SETUP")
   if (_this.socketCB) {
@@ -40,14 +38,23 @@ let setupCB = (_this) => {
     sock.off("message", _this.socketCB);
   }
 
-
-  console.log("set up socket")
-  _this.socketCB = sock.on("message", (data, payload) => {
-    _this.setState({ last: payload });
-    console.log("ACK from mounted Remounted listener")
-    console.log(data);
+  console.log("set up the socket")
+  
+  _this.socketCB = sock.on("message", (type, data) => {
+    console.log("message received '" + type + "'")
+    if(type === 'id') { 
+      console.log("got id")
+      _this.setState({ id: data });
+    } else if(type === 'todo'){
+      console.log(data);
+       _this.setState({ last: data.todo.substring(0,20) });
+      console.log("ACK from mounted Remounted listener")
+      // console.log(substring(0,20));
+    } else {
+      _this.setState({last: `unknown message ${type}`});
+    }
   });
-
+  sock.send("getTodo")
   hasBeenSetup = true;
 }
 export default class SocketStatus extends Component {
@@ -75,7 +82,6 @@ export default class SocketStatus extends Component {
   render() {
     // Play with it...
     const name = 'SocketStatus1';
-    debugger
     setupCB(this);
 
     return (
@@ -83,6 +89,9 @@ export default class SocketStatus extends Component {
         <button onClick={this.handleClick}>
           {this.state.isToggleOn ? 'ON' : 'OFF'}
         </button>
+        <h2 className="hello-world">
+          <span className="hello-world__i">ID: {this.state.id}</span>
+        </h2>
         <h2 className="hello-world">
           <span className="hello-world__i">{this.state.last}</span>
         </h2>

@@ -1,5 +1,5 @@
 let state = {}
-console.log("\n\nloaded")
+console.log("\n\nALL.js loaded")
 module.exports = (bs,req, res, next) =>
 {
   if (req.originalUrl === "/service-worker.js") {

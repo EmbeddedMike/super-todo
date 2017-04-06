@@ -1,14 +1,15 @@
 # IN
-Order sundowner
-https://www.sunsetterflagpole.com/costconew/order_awning.asp?model=m&extpromo=U
-John Greenland (jsgjnr@gmail.com)
-Costco member #111843593497
-John • Tue, 6:11 PM
 
 # Next
 
 * Order new bathroom fan timer
 # Waiting
+Check size for awning
+Order sundowner
+https://www.sunsetterflagpole.com/costconew/order_awning.asp?model=m&extpromo=U
+John Greenland (jsgjnr@gmail.com)
+Costco member #111843593497
+John • Tue, 6:11 PM
 * Share Doc with JSG
 * Cancel Hulu @1May2017
 
