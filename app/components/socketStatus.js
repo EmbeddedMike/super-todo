@@ -28,27 +28,27 @@ let label = "THIS LABEL";
 //   ; //window.socket = io(location.origin + "/browser-sync");
 // }
 //window.socket.emit('add user', "MIKE");
-let reloaded = true; //Reset when module reloads
+let hasBeenSetup = false; //Reset when module reloads
 
 let setupCB = (_this) => {
+  
+  if (hasBeenSetup) return;
+  //Release old callback, if it exists
   console.log("SETUP")
-  // if (reloaded) {
-  //   reloaded = false;
-  //   if (_this.socketCB) {
-  //     console.log("OFF")
-  //     sock.off("message", socketCB);
-  //     _this.socketCB = undefined
-  //   }
-  // }
-  if (!_this.sockeCB) {
-    console.log("set up socket")
-    _this.socketCB = sock.on("message", (data) => {
-      _this.setState({ last: data });
-      console.log("ACK from mounted MESSAGE listener")
-      console.log(data);
-    });
-
+  if (_this.socketCB) {
+    console.log("OFF")
+    sock.off("message", _this.socketCB);
   }
+
+
+  console.log("set up socket")
+  _this.socketCB = sock.on("message", (data) => {
+    _this.setState({ last: data });
+    console.log("ACK from mounted Remounted listener")
+    console.log(data);
+  });
+
+  hasBeenSetup = true;
 }
 export default class SocketStatus extends Component {
   constructor(props) {
@@ -74,8 +74,8 @@ export default class SocketStatus extends Component {
   }
   render() {
     // Play with it...
-    const name = 'SocketStatus';
-    console.log(setupCB)
+    const name = 'SocketStatus1';
+    debugger
     setupCB(this);
 
     return (
