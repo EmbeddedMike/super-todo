@@ -42,8 +42,8 @@ let setupCB = (_this) => {
 
 
   console.log("set up socket")
-  _this.socketCB = sock.on("message", (data) => {
-    _this.setState({ last: data });
+  _this.socketCB = sock.on("message", (data, payload) => {
+    _this.setState({ last: payload });
     console.log("ACK from mounted Remounted listener")
     console.log(data);
   });
