@@ -96,16 +96,14 @@ var bsConfig = {
 
 
 };
-const path = require("path");
-const fsp = require("fs-promise");
 
-const readTodoList = (name) => {
-  return fsp.readFile(path.join(".data", name + ".md")).then(contents => contents.toString());
-}
-const socketCode = () => {
-  require("./server/socket.js")(bs, req, res, next)
-}
+
+
 const initted = function () {
+  require("./server/socket.js").register(bs)
+
+}
+obsolete = () => {
   // socketCode()
   console.log("Initializing");
   let state = {}
@@ -124,7 +122,7 @@ const initted = function () {
     if (type === "getTodo") {
       socket.send("id", id);
       readTodoList("mwolf").then(
-        list => socket.send( "todo",
+        list => socket.send("todo",
           {
             id: id,
             todo: "THIS IS THE list"
