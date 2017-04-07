@@ -23,6 +23,9 @@ module.exports.register = (bs, newState) => {
     state = { seq: 0, connectionData: [] }
     setupState()
     state.onConnection = sock.on('connection', (socket) => {
+      console.log("!!!!!!!!!!")
+      console.log(socket.on)
+      console.log(socket.removeListener)
       state.connectionData.push({ seq: ++state.seq, socket });
       processEntriesFrom(state.connectionData.length - 1);
     });
@@ -34,11 +37,12 @@ const processEntriesFrom = (n) => {
     let entry = state.connectionData[i];
     entry.id = "Session: " + entry.seq;
     if (entry.cb) {
-      entry.socket.off("message", entry.cb)
+      entry.socket.removeListener("message", entry.cb)
     }
-    entry.cb = entry.socket.on('message', (type, body) => {
+    entry.cb = (type, body) => {
       state.processMessage(entry.socket, entry.id, type, body);
-    });
+    }
+    entry.socket.on("message", entry.cb)
   }
 }
 
