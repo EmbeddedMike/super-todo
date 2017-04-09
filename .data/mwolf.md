@@ -1,27 +1,26 @@
 # IN
+Email Hendrik
+Email Andew at Poliquin's office
+Finish cutting up tree in driveway
+Look up "just grass"
 
 # Next
+Process all the stuff in my Inbox todo list
 
-* Order new bathroom fan timer
 # Waiting
 
 * Share Doc with JSG
 * Cancel Hulu @1May2017
+Callback from big jay
+
 
 ## Email
-* Reach to Tim Seely 
+* Reach to Tim Seely
+* Email Murnik re bus
 
 # Projects
-### dev.ed
-* Learn Glamourous #dev.ed
-* Learn Quokka #dev.ed
-* Learn Wallaby #dev.ed
-* VS Code terminal tutorial Daniel Imms #dev.ed
-* Code Sandbox #dev.ed
-* Learn [ripgrep](https://github.com/BurntSushi/ripgrep) #dev.ed 
-
 #### todolist
-* refactor server for hot reloading   
+
 * todolist persists on server:
 *# 1. Server to get todo list from .data
 ** 2. client to request todolist from server
@@ -37,6 +36,18 @@
 * when entering a line, change to raw text
 * add Ctrl-K and hyperlinks
 * add @context #project.project and automatic sorting (when leaving the line)
+### dev.ed
+Learn how HMR works
+* Learn Glamourous #dev.ed
+* Learn Quokka #dev.ed
+* Learn Wallaby #dev.ed
+* VS Code terminal [tutorial](http://www.growingwiththeweb.com/2017/03/mastering-vscodes-terminal.html) Daniel Imms #dev.ed
+* Code Sandbox #dev.ed
+* Learn [ripgrep](https://github.com/BurntSushi/ripgrep) #dev.ed 
+* React DnD
+Code Splitting with [React](https://hackernoon.com/code-splitting-for-react-router-with-webpack-and-hmr-bb509968e86f)
+React Datasheet [github](https://github.com/nadbm/react-datasheet)
+
 
 #### ed
 * stuff
@@ -211,3 +222,5 @@ https://www.sunsetterflagpole.com/costconew/order_awning.asp?model=m&extpromo=U
 John Greenland (jsgjnr@gmail.com)
 Costco member #111843593497
 John • Tue, 6:11 PM
+* Order new bathroom fan timer #done
+* refactor server for hot reloading #done

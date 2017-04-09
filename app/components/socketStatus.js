@@ -73,14 +73,12 @@ render() {
   // Play with it...
   const name = 'SocketStatus1';
   setupCB(this);
-
+  console.log("Rendered SS")
+  console.log(this.props)
   return (
     <div>
-      <button onClick={this.handleClick}>
-        {this.state.isToggleOn ? 'ON' : 'OFF'}
-      </button>
       <h2 className="hello-world">
-        <span className="hello-world__i">ID: {this.state.id}</span>
+        <span className="hello-world__i">ID: {this.props.id}</span>
       </h2>
       <h2 className="hello-world">
         <span className="hello-world__i">{this.state.last}</span>

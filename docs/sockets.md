@@ -32,3 +32,5 @@ socket.on('test', function (data) {
 ```
 The `message` listener gets whatever is sent with `socket.send.` It would also get something sent by a custom emit event: `socket.emit('message',....)`
 
+The process of operation is the following:
+

@@ -13,6 +13,7 @@ class GDTEditor extends React.Component{
 	updateCode(newCode) {
 		this.setState({
 			code: newCode,
+			id: ""
 		});
 	}
 	componentDidMount(){
@@ -26,7 +27,6 @@ class GDTEditor extends React.Component{
 	}
 	checkEnter(e) {
 		if(e.which === 13 ){
-			this.setState({code: this.state.code + "XX"})
 			this.readTodos()
 		}
 	}
@@ -34,7 +34,7 @@ class GDTEditor extends React.Component{
 		console.log(e)
 	}
 	readTodos() {
-		console.log("READing " + this.textInput.value)
+		this.setState({id: this.textInput.value})
 	}
 	render() {
 		var options = {
@@ -42,7 +42,7 @@ class GDTEditor extends React.Component{
 		};
 			// onBlur={this.readTodos.bind(this)}
 		
-		console.log("Rendered once more!!!")
+		console.log("Rendered once more!!!" + this.state.id)
 	
 		return (<div>
 			<input
@@ -52,6 +52,7 @@ class GDTEditor extends React.Component{
 			/>
 		<CodeMirror value={this.state.code} onChange={this.updateCode.bind(this)} options={options} />
         <SocketStatus 
+		id={this.state.id}
 		
 		/>
 		</div>)
