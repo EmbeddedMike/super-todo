@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 //Test the socket connection
 const managers = window.___browserSync___.io.managers;
+window.myBeforeUnload = () => {console.log("closing"); sock.send("closing")}
 
 //The first manager is the one that BrowserSync uses
 
@@ -9,28 +10,12 @@ const man1 = managers[Object.keys(managers)[0]];
 //The socket that BrowserSync uses is the first entry in the connecting array
 const sock = man1.connecting[0];
 
-//So now let's emit data
-
-// const sock2 = man1.socket("altspace")
-// sock2.connect("connect payload")
-// sock.emit("test", `Socket connected ${sock.connected}`)
-// sock.emit("test", `Socket2 connected ${sock2.connected}`)
-// sock.send("something that is really ng that is not a message", "more stuff");
 
 let label = "THIS LABEL";
-// const io = require("socket.io-client");
-// window.io = io;
-
-// console.log(io)
-// // var socket = io()
-// if (true && !window.socket) {
-//   ; //window.socket = io(location.origin + "/browser-sync");
-// }
-//window.socket.emit('add user', "MIKE");
 let hasBeenSetup = false; //Reset when module reloads
 
 let setupCB = (_this) => {
-  if (hasBeenSetup) return; 
+  if (hasBeenSetup) return;
   //Release old callback, if it exists
   console.log("SETUP")
   if (_this.socketCB) {
@@ -39,19 +24,19 @@ let setupCB = (_this) => {
   }
 
   console.log("set up the socket")
-  
+
   _this.socketCB = sock.on("message", (type, data) => {
-    console.log("message received '" + type + "'")
-    if(type === 'id') { 
-      console.log("got id")
+    // console.log("message received '" + type + "'")
+    if (type === 'id') {
+      // console.log("got id")
       _this.setState({ id: data });
-    } else if(type === 'todo'){
+    } else if (type === 'todo') {
       console.log(data);
-       _this.setState({ last: data.todo.substring(0,20) });
-      console.log("ACK from mounted Remounted listener")
+      _this.setState({ last: data.todo.substring(0, 20) });
+      // console.log("ACK from mounted Remounted listener")
       // console.log(substring(0,20));
     } else {
-      _this.setState({last: `unknown message ${type}`});
+      _this.setState({ last: `unknown message ${type}` });
     }
   });
   sock.send("getTodo")
@@ -73,29 +58,34 @@ export default class SocketStatus extends Component {
   componentWillMount() {
     console.log("mount");
     setupCB = setupCB.bind(this);
+    window.addEventListener("beforeunload", () => window.myBeforeUnload())
 
+    // sock.send("opening");
   }
   componentWillUnmount() {
-    console.log("Unmount")
+    console.log("UNLOADING")
+    sock.send("closing");
 
   }
-  render() {
-    // Play with it...
-    const name = 'SocketStatus1';
-    setupCB(this);
 
-    return (
-      <div>
-        <button onClick={this.handleClick}>
-          {this.state.isToggleOn ? 'ON' : 'OFF'}
-        </button>
-        <h2 className="hello-world">
-          <span className="hello-world__i">ID: {this.state.id}</span>
-        </h2>
-        <h2 className="hello-world">
-          <span className="hello-world__i">{this.state.last}</span>
-        </h2>
-      </div>
-    );
-  }
+
+render() {
+  // Play with it...
+  const name = 'SocketStatus1';
+  setupCB(this);
+
+  return (
+    <div>
+      <button onClick={this.handleClick}>
+        {this.state.isToggleOn ? 'ON' : 'OFF'}
+      </button>
+      <h2 className="hello-world">
+        <span className="hello-world__i">ID: {this.state.id}</span>
+      </h2>
+      <h2 className="hello-world">
+        <span className="hello-world__i">{this.state.last}</span>
+      </h2>
+    </div>
+  );
+}
 }

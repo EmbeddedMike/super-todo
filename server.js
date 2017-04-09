@@ -32,22 +32,24 @@ const allMiddleware = (req, res, next) => {
 const chokidar = require('chokidar');
 const watcher = chokidar.watch('./server');
 let clearCache = (mode, id) => {
-  console.log("Clearing /server/ module cache from server :" + id);
+  // console.log("Clearing /server/ module cache from server :" + id);
   const resolved = require.resolve("./" + id);
   let module;
   let state;
   if (require.cache[resolved]) {
     module = require(resolved);
-    if (module.deregister) state = module.deregister()
+    if (module && module.deregister) state = module.deregister()
     delete require.cache[resolved];
   }
-  state = state ? state : {}
   try {
-    module = require(resolved);
-    if (module.register) module.register(bs, state)
+    let newModule = require(resolved);
+    if (newModule.register) newModule.register(bs, state)
   }
   catch (e) {
-    console.log(e)
+    console.log("Error requiring a module")
+    console.log(e).toString()
+    if (module) require.cache[resolved] = module;
+    if (module && module.register) module.register(bs, state)
   }
 
 };
@@ -100,7 +102,12 @@ var bsConfig = {
 
 
 const initted = function () {
-  require("./server/socket.js").register(bs)
+  try {
+    require("./server/socket.js").register(bs)
+  }
+  catch (e) {
+    console.log(e)
+  }
 
 }
 obsolete = () => {
