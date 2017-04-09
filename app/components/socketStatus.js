@@ -31,7 +31,10 @@ let setupCB = (_this) => {
       // console.log("got id")
       _this.setState({ id: data });
     } else if (type === 'todo') {
+      console.log("TODO received")
       console.log(data);
+      _this.props.returnTodo + ""
+      _this.props.returnTodo(data.todo)
       _this.setState({ last: data.todo.substring(0, 20) });
       // console.log("ACK from mounted Remounted listener")
       // console.log(substring(0,20));
@@ -39,7 +42,7 @@ let setupCB = (_this) => {
       _this.setState({ last: `unknown message ${type}` });
     }
   });
-  sock.send("getTodo")
+  
   hasBeenSetup = true;
 }
 export default class SocketStatus extends Component {
@@ -67,14 +70,17 @@ export default class SocketStatus extends Component {
     sock.send("closing");
 
   }
-
+componentWillReceiveProps(nextProps){
+  console.log("Will receive")
+  if(nextProps.id != this.props.id){
+    sock.send("getTodo", {id: nextProps.id});
+  }
+}
 
 render() {
   // Play with it...
   const name = 'SocketStatus1';
   setupCB(this);
-  console.log("Rendered SS")
-  console.log(this.props)
   return (
     <div>
       <h2 className="hello-world">

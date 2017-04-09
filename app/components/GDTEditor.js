@@ -22,19 +22,19 @@ class GDTEditor extends React.Component{
 	componentWillUnMount(){
 		console.log("Unmounting")
 	}
-	testFunction() {
-		console.log("TESTed")
-	}
+	
 	checkEnter(e) {
 		if(e.which === 13 ){
 			this.readTodos()
 		}
 	}
-	setInput(e){
-		console.log(e)
-	}
+	
 	readTodos() {
 		this.setState({id: this.textInput.value})
+	}
+	returnTodo(todos) {
+		console.log("RETURN")
+		this.setState({code:todos})
 	}
 	render() {
 		var options = {
@@ -53,6 +53,7 @@ class GDTEditor extends React.Component{
 		<CodeMirror value={this.state.code} onChange={this.updateCode.bind(this)} options={options} />
         <SocketStatus 
 		id={this.state.id}
+		returnTodo={this.returnTodo.bind(this)}
 		
 		/>
 		</div>)

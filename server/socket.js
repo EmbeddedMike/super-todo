@@ -75,14 +75,15 @@ const path = require("path");
 const fsp = require("fs-promise");
 
 const getTodo = (socket, id, type, data) => {
-  socket.send("id", id);
+  console.log("getDoto")
+  state.userName = data.id;
   fsp.readFile(path.join(".data", state.userName + ".md")).
     then(contents => contents.toString())
     .then(
     list => socket.send("todo",
       {
         id: id,
-        todo: "THIS IS NOT THE list"
+        todo: list
       }));
 }
 
