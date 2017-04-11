@@ -16,12 +16,21 @@ class SockLog {
   sockLog = []
   constructor(sock) {
     this.sock = sock;
-    if(window._oldSockLogCallbacks){
-      window._oldSockLogCallbacks.map(
+    
+    if(window._oldSockLog){
+      window._oldSockLog.callbacks.map(
         (entry) => entry.sock.off(entry.message, entry.cb))
     }
-    window._oldSockLogCallbacks = []
+    this.callbacks = []
+    window._oldSockLog = this;
+    this.clearLog = this.clearLog.bind(this);
   }
+  clearLog(component){
+    this.sockLog = []
+   
+    component.forceUpdate()
+  }
+
   dump(string){
     console.log(string);
     return;
@@ -39,7 +48,7 @@ class SockLog {
       this.dump("After on")
       cb(type, data);
     }
-    window._oldSockLogCallbacks.push({sock, message, cb:this.newCB})
+    this.callbacks.push({sock, message, cb:this.newCB})
     this.sock.on(message, this.newCB)
   }
   off(message, cb){
@@ -113,19 +122,25 @@ export default class SocketStatus extends Component {
       sock.send("getTodo", { id: nextProps.id });
     }
   }
-
+  clearLog(){
+    console.clear()
+    console.log("Clearest");
+    sock.clearLog(this);
+  }
   render() {
     // Play with it...
     const name = 'SocketStatus1';
     setupCB(this);
     return (
       <div>
-        <h2 className="hello-world">
-          <span className="hello-world__i">ID: {this.props.id}</span>
-        </h2>
-        <h2 className="hello-world">
-          <span className="hello-world__i">{this.state.last}</span>
-        </h2>
+        <button onClick={this.clearLog.bind(this)}>Clear</button>
+        <ul>
+          {sock.sockLog.length + " " + this.state.last}
+          {sock.sockLog.map((e)=> <li>{e.op 
+              + " : " 
+              + e.type + " " 
+              + JSON.stringify(e.data).slice(0,100)}</li>)}
+        </ul>
       </div>
     );
   }
