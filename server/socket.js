@@ -3,7 +3,7 @@ module.exports = {} //structure to hang register and deregister on
 //These will be set inside a function and need to be hoisted to module level
 let state = {}
 
-//The deregister function exports the state so it can be 
+//The de-register function exports the state so it can be 
 //forwarded to the reloaded module
 module.exports.deregister = () => {
   return state;
@@ -75,7 +75,7 @@ const path = require("path");
 const fsp = require("fs-promise");
 
 const getTodo = (socket, id, type, data) => {
-  console.log("getDoto")
+  console.log("getTodo")
   state.userName = data.id;
   fsp.readFile(path.join(".data", state.userName + ".md")).
     then(contents => contents.toString())
@@ -91,7 +91,7 @@ const getTodo = (socket, id, type, data) => {
 
 
 
-const dumpConnnections = () => {
+const dumpConnections = () => {
   console.log(state.connectionData.length + " connections")
   state.connectionData.forEach((element, i) => {
     console.log(`${i}: ${element.id}`)
