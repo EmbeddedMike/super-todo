@@ -1,11 +1,11 @@
 # IN
-Email Hendrik
-Email Andew at Poliquin's office
-Finish cutting up tree in driveway
-Look up "just grass"
+
 
 # Next
-Process all the stuff in my Inbox todo list
+Send taxes
+Change password
+Email Hendrik
+Email Andew at Poliquin's office
 
 # Waiting
 
@@ -13,14 +13,36 @@ Process all the stuff in my Inbox todo list
 * Cancel Hulu @1May2017
 Callback from big jay
 
+# Tired
+Process all the stuff in my Inbox todo list
 
 ## Email
 * Reach to Tim Seely
 * Email Murnik re bus
 
 # Projects
-#### todolist
 
+## Writing
+Metanovels
+https://en.wikipedia.org/wiki/Metafiction
+
+Livejournal
+https://plus.google.com/u/0/105641292683040395669/posts/56k8nHo89Dq?cfem=1
+
+Javascript Modules all [about](https://medium.freecodecamp.com/javascript-modules-a-beginner-s-guide-783f7d7a5fcc)
+#### todolist
+Hook CtrlS and save GTD list
+Expand size of list
+Format input box
+Prompt for input box
+Remove large "GTD List" **title**
+Add user name to state
+Add reducer to change name in state
+Add folding to everything
+Automatically fold and unfold
+Move tagged items when moving off the line
+Prompt with tags when #
+Add table at top
 * todolist persists on server:
 *# 1. Server to get todo list from .data
 ** 2. client to request todolist from server
@@ -37,6 +59,17 @@ Callback from big jay
 * add Ctrl-K and hyperlinks
 * add @context #project.project and automatic sorting (when leaving the line)
 ### dev.ed
+
+React Training [course](https://online.reacttraining.com/courses/50507/lectures/2466461#/questions/1)
+Javascript Modules all [about](https://medium.freecodecamp.com/javascript-modules-a-beginner-s-guide-783f7d7a5fcc)
+Quokka https://quokkajs.com/docs/index.html
+Lifting state up in React https://facebook.github.io/react/docs/lifting-state-up.html
+Continue Abramov course (https://egghead.io/lessons/javascript-redux-implementing-combinereducers-from-scratch?series=getting-started-with-redux)
+React Hot loader 
+https://github.com/gaearon/react-hot-loader/pull/240
+https://github.com/gaearon/react-hot-boilerplate/pull/61
+Gearon HMR Medium post https://medium.com/@dan_abramov/hot-reloading-in-react-1140438583bf
+Troubleshooting https://github.com/gaearon/react-hot-loader/blob/master/docs/Troubleshooting.md
 Learn how HMR works
 * Learn Glamourous #dev.ed
 * Learn Quokka #dev.ed
@@ -48,9 +81,14 @@ Learn how HMR works
 Code Splitting with [React](https://hackernoon.com/code-splitting-for-react-router-with-webpack-and-hmr-bb509968e86f)
 React Datasheet [github](https://github.com/nadbm/react-datasheet)
 
+####Identity
 
-#### ed
-* stuff
+Fix github profile
+https://github.com/settings/profile
+#### Reading
+Julia Cameron article [NYMag](http://nymag.com/thecut/2016/04/julia-cameron-the-artists-way.html)
+Read Anathem
+NPR report on health [here](http://www.npr.org/sections/health-shots/2017/04/10/523005353/how-u-s-health-care-became-big-business)
 
 ## ToDo
 * Listen to Serial
@@ -60,6 +98,9 @@ React Datasheet [github](https://github.com/nadbm/react-datasheet)
 * Review Taxes
 * Print Taxes
 * Send
+
+##Home
+Cut up tree
 
 ## CabinetDoor
 * Research
@@ -99,7 +140,14 @@ Create a “clone-project” script that does a git clone, cd, npm-install, code
 * Law and Code
 
 # Someday
+Move stuff from LiveJournal
 6 Second rule
+Change Linux login screen
+Vacuum shit from car
+Get new charger for dustbuster
+Take old car vac to recycle
+Read YZ article on Chosen People [here](https://medium.com/@yonatanzunger/a-chosen-people-3c4a1366b867)
+
 
 ** Macros for VS Code
 ** Own version of VSCode
@@ -224,3 +272,4 @@ Costco member #111843593497
 John • Tue, 6:11 PM
 * Order new bathroom fan timer #done
 * refactor server for hot reloading #done
+Add patent pending to Scott #done
