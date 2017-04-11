@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 //Test the socket connection
 const managers = window.___browserSync___.io.managers;
 window.myBeforeUnload = () => { console.log("closing"); sock.send("closing") }
+import { setUser } from "../actions/index.js"
 
 //The first manager is the one that BrowserSync uses
 
@@ -16,8 +17,8 @@ class SockLog {
   sockLog = []
   constructor(sock) {
     this.sock = sock;
-    
-    if(window._oldSockLog){
+
+    if (window._oldSockLog) {
       window._oldSockLog.callbacks.map(
         (entry) => entry.sock.off(entry.message, entry.cb))
     }
@@ -25,15 +26,15 @@ class SockLog {
     window._oldSockLog = this;
     this.clearLog = this.clearLog.bind(this);
   }
-  clearLog(component){
+  clearLog(component) {
     this.sockLog = []
-   
+
     component.forceUpdate()
   }
 
-  dump(string){
-    console.log(string);
+  dump(string) {
     return;
+    console.log(string);
     this.sockLog.map((item) => console.log(item));
     console.log("=====")
   }
@@ -43,16 +44,16 @@ class SockLog {
     this.sock.send(type, data)
   }
   on(message, cb) {
-    this.newCB = (type, data)=>{
+    this.newCB = (type, data) => {
       this.sockLog.push({ op: "get", type, data });
       this.dump("After on")
       cb(type, data);
     }
-    this.callbacks.push({sock, message, cb:this.newCB})
+    this.callbacks.push({ sock, message, cb: this.newCB })
     this.sock.on(message, this.newCB)
   }
-  off(message, cb){
-    this.sock.off(message,this.newCB)
+  off(message, cb) {
+    this.sock.off(message, this.newCB)
   }
 }
 sock = new SockLog(sock)
@@ -63,22 +64,20 @@ let hasBeenSetup = false; //Reset when module reloads
 let setupCB = (_this) => {
   if (hasBeenSetup) return;
   //Release old callback, if it exists
-  console.log("SETUP")
   if (_this.socketCB) {
-    console.log("OFF")
     sock.off("message", _this.socketCB);
   }
 
-  console.log("set up the socket")
 
   _this.socketCB = sock.on("message", (type, data) => {
     // console.log("message received '" + type + "'")
     if (type === 'id') {
       // console.log("got id")
       _this.setState({ id: data });
+
     } else if (type === 'todo') {
-      console.log("TODO received")
-      console.log(data);
+      // console.log("TODO received")
+      // console.log(data);
       _this.props.returnTodo + ""
       _this.props.returnTodo(data.todo)
       _this.setState({ last: data.todo.substring(0, 20) });
@@ -91,7 +90,7 @@ let setupCB = (_this) => {
 
   hasBeenSetup = true;
 }
-export default class SocketStatus extends Component {
+class SocketStatus extends Component {
   constructor(props) {
     super(props);
     this.state = { isToggleOn: true };
@@ -105,26 +104,32 @@ export default class SocketStatus extends Component {
     }));
   }
   componentWillMount() {
-    console.log("mount");
+    // console.log("mount");
     setupCB = setupCB.bind(this);
     window.addEventListener("beforeunload", () => window.myBeforeUnload())
 
     // sock.send("opening");
   }
   componentWillUnmount() {
-    console.log("UNLOADING")
+    // console.log("UNLOADING")
     sock.send("closing");
 
   }
   componentWillReceiveProps(nextProps) {
-    console.log("Will receive")
+    // console.log("Will receive")
     if (nextProps.id != this.props.id) {
       sock.send("getTodo", { id: nextProps.id });
+      this.props.setUser(nextProps.id)
     }
+    // if (nextProps.id && nextProps.id.slice(-1) === "!") {
+    //   const id = nextProps.id.slice(0,-1)
+    //   sock.send("getTodo", { id });
+    //   setUser(id)
+    // }
   }
-  clearLog(){
+  clearLog() {
     console.clear()
-    console.log("Clearest");
+    // console.log("Clearest");
     sock.clearLog(this);
   }
   render() {
@@ -136,12 +141,29 @@ export default class SocketStatus extends Component {
         <button onClick={this.clearLog.bind(this)}>Clear</button>
         <ul>
           {sock.sockLog.length + " " + this.state.last}
-          {sock.sockLog.map((e)=> <li>{e.op 
-              + " : " 
-              + e.type + " " 
-              + JSON.stringify(e.data).slice(0,100)}</li>)}
+          {"ALT: " + this.props.altUser}
+          {sock.sockLog.map((e, i) => <li key={"" + i}>{e.op
+            + " : "
+            + e.type + " "
+            + JSON.stringify(e.data).slice(0, 100)}</li>)}
         </ul>
       </div>
     );
   }
 }
+import { connect } from "react-redux";
+const mapStateToProps = (state, ownProps) => {
+  return { altUser: state.user }
+}
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    setUser : (name) => {
+        dispatch(setUser(name))
+    }
+  }
+}
+    
+export default connect(
+      mapStateToProps,
+      mapDispatchToProps
+    )(SocketStatus)
