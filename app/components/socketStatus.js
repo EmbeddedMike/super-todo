@@ -1,15 +1,52 @@
 import React, { Component } from 'react';
 //Test the socket connection
 const managers = window.___browserSync___.io.managers;
-window.myBeforeUnload = () => {console.log("closing"); sock.send("closing")}
+window.myBeforeUnload = () => { console.log("closing"); sock.send("closing") }
 
 //The first manager is the one that BrowserSync uses
 
 const man1 = managers[Object.keys(managers)[0]];
 
 //The socket that BrowserSync uses is the first entry in the connecting array
-const sock = man1.connecting[0];
+let sock = man1.connecting[0];
 
+//import sockLog from ('sockLog')
+//Socket IO with logging
+class SockLog {
+  sockLog = []
+  constructor(sock) {
+    this.sock = sock;
+    if(window._oldSockLogCallbacks){
+      window._oldSockLogCallbacks.map(
+        (entry) => entry.sock.off(entry.message, entry.cb))
+    }
+    window._oldSockLogCallbacks = []
+  }
+  dump(string){
+    console.log(string);
+    return;
+    this.sockLog.map((item) => console.log(item));
+    console.log("=====")
+  }
+  send(type, data) {
+    this.sockLog.push({ op: "send", type, data });
+    this.dump("Sent!")
+    this.sock.send(type, data)
+  }
+  on(message, cb) {
+    this.newCB = (type, data)=>{
+      this.sockLog.push({ op: "get", type, data });
+      this.dump("After on")
+      cb(type, data);
+    }
+    window._oldSockLogCallbacks.push({sock, message, cb:this.newCB})
+    this.sock.on(message, this.newCB)
+  }
+  off(message, cb){
+    this.sock.off(message,this.newCB)
+  }
+}
+sock = new SockLog(sock)
 
 let label = "THIS LABEL";
 let hasBeenSetup = false; //Reset when module reloads
@@ -42,7 +79,7 @@ let setupCB = (_this) => {
       _this.setState({ last: `unknown message ${type}` });
     }
   });
-  
+
   hasBeenSetup = true;
 }
 export default class SocketStatus extends Component {
@@ -70,26 +107,26 @@ export default class SocketStatus extends Component {
     sock.send("closing");
 
   }
-componentWillReceiveProps(nextProps){
-  console.log("Will receive")
-  if(nextProps.id != this.props.id){
-    sock.send("getTodo", {id: nextProps.id});
+  componentWillReceiveProps(nextProps) {
+    console.log("Will receive")
+    if (nextProps.id != this.props.id) {
+      sock.send("getTodo", { id: nextProps.id });
+    }
   }
-}
 
-render() {
-  // Play with it...
-  const name = 'SocketStatus1';
-  setupCB(this);
-  return (
-    <div>
-      <h2 className="hello-world">
-        <span className="hello-world__i">ID: {this.props.id}</span>
-      </h2>
-      <h2 className="hello-world">
-        <span className="hello-world__i">{this.state.last}</span>
-      </h2>
-    </div>
-  );
-}
+  render() {
+    // Play with it...
+    const name = 'SocketStatus1';
+    setupCB(this);
+    return (
+      <div>
+        <h2 className="hello-world">
+          <span className="hello-world__i">ID: {this.props.id}</span>
+        </h2>
+        <h2 className="hello-world">
+          <span className="hello-world__i">{this.state.last}</span>
+        </h2>
+      </div>
+    );
+  }
 }
