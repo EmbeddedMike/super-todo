@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 //Test the socket connection
 const managers = window.___browserSync___.io.managers;
-window.myBeforeUnload = () => { console.log("closing"); sock.send("closing") }
-import { setUser } from "../actions/index.js"
+
 
 //The first manager is the one that BrowserSync uses
 
@@ -40,7 +39,6 @@ class SockLog {
   }
   send(type, data) {
     this.sockLog.push({ op: "send", type, data });
-    this.dump("Sent!")
     this.sock.send(type, data)
   }
   on(message, cb) {
@@ -71,11 +69,7 @@ let setupCB = (_this) => {
 
   _this.socketCB = sock.on("message", (type, data) => {
     // console.log("message received '" + type + "'")
-    if (type === 'id') {
-      // console.log("got id")
-      _this.setState({ id: data });
-
-    } else if (type === 'todo') {
+    if (type === 'todo') {
       // console.log("TODO received")
       // console.log(data);
       _this.props.returnTodo + ""
@@ -115,17 +109,14 @@ class SocketStatus extends Component {
     sock.send("closing");
 
   }
+  componentDidMount() {
+    sock.send("getTodo", { user: this.props.user });
+  }
   componentWillReceiveProps(nextProps) {
-    // console.log("Will receive")
-    if (nextProps.id != this.props.id) {
-      sock.send("getTodo", { id: nextProps.id });
-      this.props.setUser(nextProps.id)
+    if (nextProps.user != this.props.user) {
+      sock.send("getTodo", { user: nextProps.user });
     }
-    // if (nextProps.id && nextProps.id.slice(-1) === "!") {
-    //   const id = nextProps.id.slice(0,-1)
-    //   sock.send("getTodo", { id });
-    //   setUser(id)
-    // }
+    
   }
   clearLog() {
     console.clear()
@@ -141,7 +132,7 @@ class SocketStatus extends Component {
         <button onClick={this.clearLog.bind(this)}>Clear</button>
         <ul>
           {sock.sockLog.length + " " + this.state.last}
-          {"ALT: " + this.props.altUser}
+          {"ALT: " + this.props.user}
           {sock.sockLog.map((e, i) => <li key={"" + i}>{e.op
             + " : "
             + e.type + " "
@@ -153,9 +144,10 @@ class SocketStatus extends Component {
 }
 import { connect } from "react-redux";
 const mapStateToProps = (state, ownProps) => {
-  return { altUser: state.user }
+  return { user: state.user }
 }
 const mapDispatchToProps = (dispatch, ownProps) => {
+  return{}
   return {
     setUser : (name) => {
         dispatch(setUser(name))
@@ -165,5 +157,5 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     
 export default connect(
       mapStateToProps,
-      mapDispatchToProps
+      null
     )(SocketStatus)
