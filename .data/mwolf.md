@@ -2,13 +2,10 @@
 
 
 # Next
-Send taxes
-Change password
-Email Hendrik
-Email Andew at Poliquin's office
+
 
 # Waiting
-
+Taxes accepted
 * Share Doc with JSG
 * Cancel Hulu @1May2017
 Callback from big jay
@@ -17,7 +14,7 @@ Callback from big jay
 Process all the stuff in my Inbox todo list
 
 ## Email
-* Reach to Tim Seely
+
 * Email Murnik re bus
 
 # Projects
@@ -140,6 +137,12 @@ Create a “clone-project” script that does a git clone, cd, npm-install, code
 * Law and Code
 
 # Someday
+Email Tim Seely
+
+Email Hendrik
+Email Andrew at Poliquin's office
+Email Hendrik
+Email Andrew at Poliquin's office
 Move stuff from LiveJournal
 6 Second rule
 Change Linux login screen
@@ -273,3 +276,4 @@ John • Tue, 6:11 PM
 * Order new bathroom fan timer #done
 * refactor server for hot reloading #done
 Add patent pending to Scott #done
+Send taxes

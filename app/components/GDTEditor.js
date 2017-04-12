@@ -2,6 +2,7 @@ const React = require('react');
 const CodeMirror = require('react-codemirror');
 import SocketStatus from "./socketStatus";
 require('codemirror/lib/codemirror.css');
+require('codemirror/mode/markdown/markdown');
 import { setUser } from "../actions/index.js"
 
 
@@ -40,6 +41,7 @@ class GDTEditor extends React.Component {
 	render() {
 		var options = {
 			lineNumbers: true,
+			mode: "markdown"
 		};
 	
 
