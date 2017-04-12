@@ -29,7 +29,7 @@ const replaceListener = (agent, message, obj, attr, cb) =>{
 
 
 const setupState = (sock) => {
-  state.userName = "mwolf";
+  state.user = "mwolf";
   replaceListener(sock,"connection", state, 'connectionListener', connectionListener );
   replaceListener(sock,"close", state, 'disconnectionListener', disconnectionListener );
   state.connectionData.map(processConnection)
@@ -49,7 +49,7 @@ const processConnection = (entry) => {
   replaceListener(entry.socket,
     "message", entry, 'cb', 
     (type, body) => {
-    processMessage(entry.socket, entry.id, type, body);
+    processMessage(entry.socket, entry.user, type, body);
     }
   )
   entry.socket.send("heartbeat", "" + entry.seq)
@@ -76,13 +76,13 @@ const fsp = require("fs-promise");
 
 const getTodo = (socket, id, type, data) => {
   console.log("getTodo")
-  state.userName = data.id;
-  fsp.readFile(path.join(".data", state.userName + ".md")).
+  state.user = data.user;
+  fsp.readFile(path.join(".data", state.user + ".md")).
     then(contents => contents.toString())
     .then(
     list => socket.send("todo",
       {
-        id: id,
+        user: id,
         todo: list
       }));
 }
