@@ -36,6 +36,7 @@
     "fs-promise": "^2.0.2",
     "html-webpack-plugin": "^2.16.1",
     "json-loader": "^0.5.4",
+    "lodash": "^4.17.4",
     "node-run": "^1.0.6",
     "node-sass": "^4.5.0",
     "npm-watch": "^0.1.8",
