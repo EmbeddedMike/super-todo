@@ -110,42 +110,5 @@ const initted = function () {
   }
 
 }
-obsolete = () => {
-  // socketCode()
-  console.log("Initializing");
-  let state = {}
-  state.seq = 0;
-  var sock = bs.sockets;
-  state.assignID = (socket) => {
-    state.seq++;
-    id = "Session " + state.seq
-    console.log(`Session ${id} connected~~~~`)
-    socket.send("id", id);
-    return id;
-  }
-  state.processMessage = (socket, id, type, body) => {
-    // we tell the client to execute 'new message'
-    console.log("got a message " + type);
-    if (type === "getTodo") {
-      socket.send("id", id);
-      readTodoList("mwolf").then(
-        list => socket.send("todo",
-          {
-            id: id,
-            todo: "THIS IS THE list"
-          }));
-    }
-  }
-
-  if (!state.onConnection) {
-    state.onConnection = sock.on('connection', (socket) => {
-      let id = state.assignID(socket)
-      socket.on('message', (type, body) => {
-        state.processMessage(socket, id, type, body);
-      });
-    });
-  }
-};
-// sock.on ("connect")
 
 bs.init(bsConfig, initted);
