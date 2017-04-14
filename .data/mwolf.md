@@ -20,7 +20,6 @@ Process all the stuff in my Inbox todo list
 # Projects
 
 ## Writing
-Metanovels
 https://en.wikipedia.org/wiki/Metafiction
 
 Livejournal
@@ -41,8 +40,8 @@ Move tagged items when moving off the line
 Prompt with tags when #
 Add table at top
 * todolist persists on server:
-*# 1. Server to get todo list from .data
-** 2. client to request todolist from server
+*# 1. Server to get todo list from .data #done
+** 2. client to request todolist from server #done
 ** 3. client to push todolist to server
 ** 4. and server to store todo list in .data
 * commit and push to glitch again
