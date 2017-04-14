@@ -28,12 +28,22 @@ const todos = (state = '', action) => {
             return state;
     }
 };
+const editorAction = (state = {}, action) => {
+    switch (action.type) {
+        case "editorAction":
+            return action.data
+        default:
+            return state;
+    }
+}
+
 
 const rootReducer = combineReducers({
     filter,
     user,
     todos,
-    routing
+    routing,
+    editorAction
 });
 
 export default rootReducer;

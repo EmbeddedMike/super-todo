@@ -113,11 +113,15 @@ class SocketStatus extends Component {
     sock.send("getTodo", { user: this.props.user });
   }
   componentWillReceiveProps(nextProps) {
-    if (nextProps.user != this.props.user) {
-      sock.send("getTodo", { user: nextProps.user });
+    if (nextProps.user && nextProps.user != this.props.user) {
+      return sock.send("getTodo", { user: nextProps.user });
     }
-    
+    if (nextProps.editorAction && (nextProps.editorAction.op === 
+    "saveTodo")) {
+      sock.send("saveTodo", { user: nextProps.user, data: this.props.getTodo() });
+    }
   }
+  
   clearLog() {
     console.clear()
     // console.log("Clearest");
@@ -144,7 +148,8 @@ class SocketStatus extends Component {
 }
 import { connect } from "react-redux";
 const mapStateToProps = (state, ownProps) => {
-  return { user: state.user }
+  return { user: state.user,
+           editorAction: state.editorAction }
 }
 const mapDispatchToProps = (dispatch, ownProps) => {
   return{}

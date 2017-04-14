@@ -60,6 +60,8 @@ const processMessage = (socket, id, type, data) => {
   // we tell the client to execute 'new message'
   if (type === "getTodo") {
     getTodo(socket, id, type, data)
+  } else if (type === 'saveTodo') {
+    saveTodo(socket, id, type, data)
   } else if (type === 'getID') {
     socket.send("id", id);
   } else if(type === 'closing'){
@@ -73,7 +75,11 @@ const processMessage = (socket, id, type, data) => {
 
 const path = require("path");
 const fsp = require("fs-promise");
-
+const saveTodo = (socket, id, type, data) => {
+  console.log(Object.keys(data));
+  fsp.writeFile(path.join(".data", data.user + ".md"), data.data)
+  .then(console.log("Written"))
+}
 const getTodo = (socket, id, type, data) => {
   console.log("getTodo")
   state.user = data.user;
