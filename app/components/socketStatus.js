@@ -120,6 +120,7 @@ class SocketStatus extends Component {
     "saveTodo")) {
       sock.send("saveTodo", { user: nextProps.user, data: this.props.getTodo() });
     }
+
   }
   
   clearLog() {

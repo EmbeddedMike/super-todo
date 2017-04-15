@@ -11,6 +11,7 @@ class GDTEditor extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { code: "//Test" }
+		this.callbacks = []
 
 	}
 	updateCode(newCode) {
@@ -18,9 +19,23 @@ class GDTEditor extends React.Component {
 			code: newCode
 		});
 	}
+	cursorActivity(cm) {
+		console.log("Cursor did move")
+	}
+	addCB(event, cb){
+		let boundCB = cb.bind(this)
+		this.cm.on(event, boundCB)
+		this.callbacks.push({event,boundCB})
+	}
 	initialize(cm) {
 		if (!cm) return;
 		if (!this.cm) this.cm = cm.getCodeMirror();
+		for(let entry of this.callbacks){
+			console.log("removed " + entry.event)
+			this.cm.off(entry.event, entry.boundCB)
+		}
+		this.callbacks = []
+		this.addCB("cursorActivity",this.cursorActivity)
 		this.cm.removeKeyMap("GTD");
 		this.cm.addKeyMap({
 			name: "GTD",
