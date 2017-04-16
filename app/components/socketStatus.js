@@ -88,7 +88,7 @@ class SocketStatus extends Component {
   constructor(props) {
     super(props);
     this.state = { isToggleOn: true };
-    this.state = { last: "no messsage yet" }
+    this.state = { last: "no message yet" }
     // This binding is necessary to make `this` work in the callback
     this.handleClick = this.handleClick.bind(this);
   }
