@@ -19,34 +19,103 @@ class GDTEditor extends React.Component {
 			code: newCode
 		});
 	}
-	cursorActivity(cm) {
-		console.log("Cursor did move")
+	isSection(line) {
+		return line.match(/^#+\s(\w*)/);
 	}
-	addCB(event, cb){
+	findSectionOfLine(n) {
+		let lastSection = ""
+		let matcher;
+		for (let i = 0; i < n; i++) {
+			if (matcher = this.isSection(this.cm.getLine(i))) {
+				lastSection = matcher[1];
+			}
+		}
+		return lastSection;
+	}
+	findSectionByName(sName) {
+		const n = this.cm.lineCount()
+		for (let i = 0; i < n; i++) {
+			let matcher;
+			if (matcher = this.isSection(this.cm.getLine(i))) {
+				if (matcher[1] === sName) {
+					return i;
+				}
+			}
+		}
+		return -1;
+	}
+	getTags(sLine) {
+		let regexp = /(#\w*)/gi;
+		let matches = sLine.match(regexp);
+		if (matches) return matches.map((m) => m.substr(1))
+		return []
+	}
+	expandTags(tags) {
+		let replaceable = {W: "Waiting", N:"Next", D: "Done", X: "Deleted", "P":"Project"}
+		return tags.map(
+			(tag) =>{
+				return replaceable[tag] ? replaceable[tag] : tag;
+			}
+		)
+	}
+	deleteLine(nLine){
+		this.cm.replaceRange("", {line:nLine, ch: 0}, {line: nLine + 1,ch: 0});
+	}
+	insertLine(nLine, sLine){
+		this.cm.replaceRange(sLine + "\n", {line:nLine + 1, ch: 0})
+
+	}
+	moveLine( nLine, sRoot, currentSection, tags ){
+		let nSection1 = this.findSectionByName(tags[0])
+		let sLine = sRoot + "#" + tags.join("# ")
+		if(currentSection === "IN"){
+			this.deleteLine(nLine)
+			if(nSection1 > nLine ) nSection1--;
+			this.insertLine(nSection1, sLine )
+		}
+	}
+	cursorActivity(cm) {
+		let currentLine = cm.getCursor().line;
+		if (currentLine === this.lastLine) return;
+		let currentSection = this.findSectionOfLine(currentLine)
+		let sLine = cm.getLine(this.lastLine);
+		if (!this.isSection(sLine)) {
+			let tags = this.getTags(sLine)
+			if (tags.length > 0) {
+				let rootLine = (sLine.match(/(.*?)#/))[1]
+				tags = this.expandTags(tags)
+				this.moveLine(this.lastLine, rootLine, currentSection, tags)
+			}
+		}
+		this.lastLine = currentLine;
+	}
+	addCB(event, cb) {
 		let boundCB = cb.bind(this)
 		this.cm.on(event, boundCB)
-		this.callbacks.push({event,boundCB})
+		this.callbacks.push({ event, boundCB })
 	}
 	initialize(cm) {
+		if (!this.lastLine) this.lastLine = 0;
 		if (!cm) return;
 		if (!this.cm) this.cm = cm.getCodeMirror();
-		for(let entry of this.callbacks){
-			console.log("removed " + entry.event)
+		for (let entry of this.callbacks) {
 			this.cm.off(entry.event, entry.boundCB)
 		}
 		this.callbacks = []
-		this.addCB("cursorActivity",this.cursorActivity)
+		this.addCB("cursorActivity", this.cursorActivity)
 		this.cm.removeKeyMap("GTD");
 		this.cm.addKeyMap({
 			name: "GTD",
-			"Ctrl-S": (cm) => {this.props.editorAction("saveTodo");
-			return false}
+			"Ctrl-S": (cm) => {
+				this.props.editorAction("saveTodo");
+				return false
+			}
 		})
 
 	}
 
 	componentDidMount() {
-		console.log	("Did Mount")
+		console.log("Did Mount")
 
 		this.textInput.value = this.props.user;
 	}
@@ -76,7 +145,7 @@ class GDTEditor extends React.Component {
 
 		return (<div>
 			<input
-			ref={(input) => { this.textInput = input }}
+				ref={(input) => { this.textInput = input }}
 				onKeyPress={this.checkEnter.bind(this)}
 				onBlur={this.readTodos.bind(this)}
 			/>
@@ -102,8 +171,8 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 			dispatch(setUser(name))
 		},
 		editorAction: (op, data) => {
-			dispatch({type: "editorAction", data: {op, data}})
-			setTimeout( () => {dispatch({type: "editorAction", data: {op: "idle"}});},300)
+			dispatch({ type: "editorAction", data: { op, data } })
+			setTimeout(() => { dispatch({ type: "editorAction", data: { op: "idle" } }); }, 300)
 		}
 	}
 }
