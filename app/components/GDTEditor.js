@@ -20,14 +20,14 @@ class GDTEditor extends React.Component {
 		});
 	}
 	isSection(line) {
-		return line.match(/^#+\s(\w*)/);
+		return line.match(/^#*\s?(#|@)\s?(\w*)/);
 	}
 	findSectionOfLine(n) {
 		let lastSection = ""
 		let matcher;
 		for (let i = 0; i < n; i++) {
 			if (matcher = this.isSection(this.cm.getLine(i))) {
-				lastSection = matcher[1];
+				lastSection = matcher[1][0] + matcher[2];
 			}
 		}
 		return lastSection;
@@ -37,7 +37,7 @@ class GDTEditor extends React.Component {
 		for (let i = 0; i < n; i++) {
 			let matcher;
 			if (matcher = this.isSection(this.cm.getLine(i))) {
-				if (matcher[1] === sName) {
+				if ((matcher[1] + matcher[2]) === sName) {
 					return i;
 				}
 			}
@@ -45,13 +45,17 @@ class GDTEditor extends React.Component {
 		return -1;
 	}
 	getTags(sLine) {
-		let regexp = /(#\w*)/gi;
-		let matches = sLine.match(regexp);
-		if (matches) return matches.map((m) => m.substr(1))
-		return []
+		let regexp = /([#@]\w*)/gi;
+		return sLine.match(regexp);
 	}
 	expandTags(tags) {
-		let replaceable = {W: "Waiting", N:"Next", D: "Done", X: "Deleted", "P":"Project"}
+		let replaceable = {"#W": "#Waiting", 
+		"#N":"#Next", 
+		"#D": "#Done",
+		"#X": "#Deleted", 
+		"#P":"#Project",
+		"@e": "@email",
+		"@p": "@phone"}
 		return tags.map(
 			(tag) =>{
 				return replaceable[tag] ? replaceable[tag] : tag;
@@ -67,8 +71,15 @@ class GDTEditor extends React.Component {
 	}
 	moveLine( nLine, sRoot, currentSection, tags ){
 		let nSection1 = this.findSectionByName(tags[0])
-		let sLine = sRoot + "#" + tags.join("# ")
-		if(currentSection === "IN"){
+		let sLine = sRoot + " " + tags.join(" ")
+		if(nSection1 === -1){
+			tags[0] += "?"
+			sLine = sRoot + " " + tags.join(" ")
+			this.cm.replaceRange(sLine, {line:nLine, ch:0}, {line:nLine, ch: null})			
+			this.cm.setCursor(nLine, sLine.length)
+			return;
+		}
+		if(currentSection === "#IN"){
 			this.deleteLine(nLine)
 			if(nSection1 > nLine ) nSection1--;
 			this.insertLine(nSection1, sLine )
@@ -77,13 +88,14 @@ class GDTEditor extends React.Component {
 	cursorActivity(cm) {
 		let currentLine = cm.getCursor().line;
 		if (currentLine === this.lastLine) return;
-		let currentSection = this.findSectionOfLine(currentLine)
+
 		let sLine = cm.getLine(this.lastLine);
 		if (!this.isSection(sLine)) {
 			let tags = this.getTags(sLine)
-			if (tags.length > 0) {
-				let rootLine = (sLine.match(/(.*?)#/))[1]
+			if (tags && tags.length > 0) {
+				let rootLine = (sLine.match(/(.*?)\s*[#@]/))[1]
 				tags = this.expandTags(tags)
+				let currentSection = this.findSectionOfLine(currentLine)
 				this.moveLine(this.lastLine, rootLine, currentSection, tags)
 			}
 		}
