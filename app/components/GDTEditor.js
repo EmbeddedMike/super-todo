@@ -14,18 +14,12 @@ class GDTEditor extends React.Component {
 		this.callbacks = []
 
 	}
-	updateCode(newCode) {
-		this.setState({
-			code: newCode
-		});
-	}
 	isSection(line) {
 		let matcher;
-		if (matcher = line.match(/^#*\s?(#|@)\s?(\w*)/)) {
+		if (matcher = line.match(/^#*\s?(#|@)\s?(\w*)\s*(\/\/|$)/)) {
 			return matcher[1][0] + matcher[2]
 		}
 		return false;
-
 	}
 	findSectionOfLine(n) {
 		this.makeSectionTable();
@@ -45,6 +39,7 @@ class GDTEditor extends React.Component {
 		for (let i = 0; i < n; i++) {
 			let sName;
 			if (sName = this.isSection(this.cm.getLine(i))) {
+				sName = sName.toLowerCase()
 				if (this.sectionTable[sName]) {
 					console.log("Duplicate Section " + sName)
 				} else {
@@ -54,6 +49,7 @@ class GDTEditor extends React.Component {
 		}
 	}
 	findSectionByName(sName) {
+		sName = sName.toLowerCase()
 		this.makeSectionTable()
 		return this.sectionTable[sName];
 	}
@@ -77,11 +73,20 @@ class GDTEditor extends React.Component {
 			}
 		)
 	}
+	adjustSectionTable(nLine, diff){
+		for(section in this.sectionTable){
+			if(this.sectionTable[section] > nLine){
+				this.sectionTable[section] += diff;
+			}
+		}
+	}
 	deleteLine(nLine) {
 		this.cm.replaceRange("", { line: nLine, ch: 0 }, { line: nLine + 1, ch: 0 });
+		this.adjustSectionTable(nLine, -1)
 	}
 	insertLine(nLine, sLine) {
 		this.cm.replaceRange(sLine + "\n", { line: nLine + 1, ch: 0 })
+		this.adjustSectionTable(nLine, +1)
 	}
 
 	validateTags(tags) {
@@ -112,72 +117,99 @@ class GDTEditor extends React.Component {
 	}
 
 	moveLineFromPositionToTag(sLine, nSource, sTag) {
-		console.log("STAG", sTag)
 		let nTag = this.findSectionByName(sTag)
 		this.deleteLine(nSource)
 		if (nTag > nSource) nTag--;
-		console.log(nTag, sLine)
-		//this.insertLine(nTag, sLine)
+		this.insertLine(nTag, sLine)
 
 	}
 
-	moveLine(nLine, sRoot, lineSection, tags) {
-		let sTags = tags.join(" ");
-		let sLine = sRoot + " " + sTags;
-		if (sTags.indexOf("?") != -1) {
-			this.cm.replaceRange(sLine, { line: nLine, ch: 0 }, { line: nLine, ch: null })
-			this.cm.setCursor(nLine, sLine.indexOf('?') + 1)
-			return;
-		} else {
-			let moveLocs = "#Done,#Waiting,#Next,#Someday".split(",");
-			for( const loc in moveLocs){
-				if(loc in tags){
-					this.moveLineFromPositionToTag(sLine,nLine,loc)
-					return
-				}
+	moveLine(nLine, sRoot, tags) {
+		
+		let sLine = sRoot + " " + tags.join(" ");
+		let moveLocs = "#Done,#Waiting,#Next,#Someday".split(",");
+		for (const loc of moveLocs) {
+			if (tags.indexOf(loc) != -1) {
+				// this.diag("LOC is " + loc)
+				this.moveLineFromPositionToTag(sLine, nLine, loc)
+				return
 			}
 		}
+        let sLastSection = this.findSectionOfLine(this.lastLine)
+
 	}
-	diag(sLine){
-	  this.insertLine(this.lastLine, sLine)
+	diag(sLine) {
+		this.insertLine(this.lastLine, sLine)
 	}
-	cursorActivity(cm) {
-		// if(this.inLoop) return;
-		this.inLoop = true;
+	trace(inargs){
+		try{
+			throw new Error()
+		} catch (e){
+			console.clear()
+			const sMethodLine = e.stack.split("\n")[3]
+			const sMethod = sMethodLine.match(/\.(\S*)/)[1]
+			const body = this[sMethod].toString().substring(0,50)
+			const args = body.match(/\((.*)\)/)[1].split(",")
+			for(let i = 0; i< args.length; i++){
+				console.log(args[i] + " = " + inargs[i])
+			}
+			
+		}
+	}
+	getRootLine(sLine){
+		if(sLine.match(/^[@#]/)){
+			return sLine[0] + sLine.substring(1).match(/^(.*?)([#@]\w*\s*)*$/)[1]
+		} else {
+			return sLine.match(/^(.*?)([#@]\w*\s*)*$/)[1]
+		}
+	}
+	cursorActivity(cm,xxy) {
+		// console.log(this.cursorActivity + "")
+		this.trace(arguments)
 		let currentLine = cm.getCursor().line;
 		if (currentLine === this.lastLine) return;
 		this.sectionTable = null;
 		let sLine = cm.getLine(this.lastLine);
 		if (!this.isSection(sLine)) {
-			let tags = this.getTags(sLine)
+			let tags = this.getTags(sLine);
 			if (tags && tags.length > 0) {
-				let rootLine = (sLine.match(/(.*?)\s*[#@]/))[1]
+				let rootLine = this.getRootLine(sLine)
+				// this.diag("ROOT " + rootLine)
+				// this.diag("tags " + tags.join(","))
 				tags = this.expandTags(tags)
 				tags = this.validateTags(tags, this.lastLine);
-				if(tags.join("").indexOf("?") != -1){
-					this.insertLine(this.lastLine, "Still a '?'")
+				if (tags.join("").indexOf("?") === -1) {
+					// this.diag("TAGZ " + tags.join("!"))
+					this.moveLine(this.lastLine, rootLine, tags)
 				}
-				let lineSection = this.findSectionOfLine(this.lastLine)
-				this.moveLine(this.lastLine, rootLine, lineSection, tags)
+				
 			}
 		}
 		this.lastLine = currentLine;
-		this.inLoop = false;
+		
 	}
 	addCB(event, cb) {
 		let boundCB = cb.bind(this)
 		this.cm.on(event, boundCB)
-		this.callbacks.push({ event, boundCB })
+		this.callbacks.push({ event, boundCB });
+	}
+	disposeHandler(){
+		console.log("I am disposed again!!! here!!")
 	}
 	initialize(cm) {
 		if (!this.lastLine) this.lastLine = 0;
 		if (!cm) return;
-		if (!this.cm) this.cm = cm.getCodeMirror();
+		this.cm = cm.getCodeMirror();
+		if(module.hot){
+			module.hot.addDisposeHandler(this.disposeHandler.bind(this))
+		}	// if(moduleInitialized) return;
+		
+	
 		for (let entry of this.callbacks) {
 			this.cm.off(entry.event, entry.boundCB)
 		}
 		this.callbacks = []
-		this.addCB("cursorActivity", debounce(this.cursorActivity,2000,true))
+		this.addCB("cursorActivity", debounce(this.cursorActivity, 50, true))
 		this.cm.removeKeyMap("GTD");
 		this.cm.addKeyMap({
 			name: "GTD",
@@ -206,12 +238,13 @@ class GDTEditor extends React.Component {
 		this.props.setUser(this.textInput.value);
 	}
 	returnTodo(todos) {
-		this.setState({ code: todos })
+		this.cm.setValue(todos)
 	}
 	getTodo() {
 		return this.cm.getValue();
 	}
 	render() {
+		console.log("render")
 		var options = {
 			lineNumbers: true,
 			mode: "gfm"
@@ -226,8 +259,7 @@ class GDTEditor extends React.Component {
 			/>
 			<CodeMirror
 				ref={(entry) => { this.initialize(entry) }}
-				value={this.state.code}
-				onChange={this.updateCode.bind(this)}
+	
 				options={options} />
 			<SocketStatus
 				returnTodo={this.returnTodo.bind(this)}
@@ -258,3 +290,4 @@ export default connect(
 	mapStateToProps,
 	mapDispatchToProps
 )(GDTEditor);
+// check if HMR is enabled

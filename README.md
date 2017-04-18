@@ -6,16 +6,16 @@
 `GTDFlow` organizes tasks and task groups in a text document in Markdown format. When you start out, `GTDFlow` gives you a blank template with these task categories (and possibly some others) defined.
 
 ```
-# IN -- where you put new tasks
-# Next -- a list of the next things to do, organized in contexts -- tasks that go together
-# @phone -- context for phone calls
-# @email -- context for emails
-# @web  -- context for web tasks, other than email
-# Waiting -- tasks depending on some external event
-# Projects -- a main heading for a user defined projects
-## SomeProject -- by convention, projects are tagged with two ##'s
-# Someday -- project and tasks that may be done, some day
-# Done -- a heading for tasks as they are completed
+# IN // where you put new tasks
+# Next // a list of the next things to do, organized in contexts // tasks that go together
+# @phone // context for phone calls
+# @email // context for emails
+# @web  // context for web tasks, other than email
+# Waiting // tasks depending on some external event
+# Projects // a main heading for a user defined projects
+## SomeProject // by convention, projects are tagged with two ##'s
+# Someday // project and tasks that may be done, some day
+# Done // a heading for tasks as they are completed
 
 ```
 
@@ -100,13 +100,17 @@ When you move off the line, GTDFlow will:
 3. Move the line below the #NewProject heading.
 
 
+ #Requirements
+ 1. Add ? if no match [X]
+ 2. Create new context if @ and ! and no match
+ 3. Create new Project if #and ! and no match
+ 3. Remove project tag when moving to project
+ 7. Add project tag when moving to #Next/Context
+ 8. Don't move from next/context back to project
+ 9. Move project to SOMEDAY
+ 2. Add #<date>! to done item
+ 3. Add #time to done item
+ 4. Auto move task from project to Next
  
-
-
-
-
-
-#Document
- If you type a section name in . When you move to another line, GTDFlow will take action based on any special symbols that you've typed.
-
-
+ 1. Return template on new name
+ 
