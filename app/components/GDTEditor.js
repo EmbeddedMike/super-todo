@@ -73,9 +73,9 @@ class GDTEditor extends React.Component {
 			}
 		)
 	}
-	adjustSectionTable(nLine, diff){
-		for(section in this.sectionTable){
-			if(this.sectionTable[section] > nLine){
+	adjustSectionTable(nLine, diff) {
+		for (const section in this.sectionTable) {
+			if (this.sectionTable[section] > nLine) {
 				this.sectionTable[section] += diff;
 			}
 		}
@@ -88,9 +88,19 @@ class GDTEditor extends React.Component {
 		this.cm.replaceRange(sLine + "\n", { line: nLine + 1, ch: 0 })
 		this.adjustSectionTable(nLine, +1)
 	}
+	removeDuplicates(tags) {
+		let result = [];
+		tags.forEach((item) => {
+			if (result.indexOf(item) < 0) {
+				result.push(item);
+			}
+		});
+		return result;
+	}
 
 	validateTags(tags) {
 		let sLine;
+		tags = this.removeDuplicates(tags)
 		let newTags = tags.map((tag) => {
 			let tagSuffix = tag[tag.length - 1]
 			if (tagSuffix === "?") return tag + "?";
@@ -117,6 +127,8 @@ class GDTEditor extends React.Component {
 	}
 
 	moveLineFromPositionToTag(sLine, nSource, sTag) {
+		//ehcek to see if already there
+		if(this.findSectionOfLine(nSource) === sTag) return;
 		let nTag = this.findSectionByName(sTag)
 		this.deleteLine(nSource)
 		if (nTag > nSource) nTag--;
@@ -125,8 +137,8 @@ class GDTEditor extends React.Component {
 	}
 
 	moveLine(nLine, sRoot, tags) {
-		
-		let sLine = sRoot + " " + tags.join(" ");
+
+		let sLine = sRoot.trim().replace(/ +/g, ' ')  + " " + tags.join(" ");
 		let moveLocs = "#Done,#Waiting,#Next,#Someday".split(",");
 		for (const loc of moveLocs) {
 			if (tags.indexOf(loc) != -1) {
@@ -135,35 +147,36 @@ class GDTEditor extends React.Component {
 				return
 			}
 		}
-        let sLastSection = this.findSectionOfLine(this.lastLine)
 
+		let tag = tags[0]
+		this.moveLineFromPositionToTag(sLine, nLine, tag)
 	}
 	diag(sLine) {
 		this.insertLine(this.lastLine, sLine)
 	}
-	trace(inargs){
-		try{
+	trace(inargs) {
+		try {
 			throw new Error()
-		} catch (e){
+		} catch (e) {
 			console.clear()
 			const sMethodLine = e.stack.split("\n")[3]
 			const sMethod = sMethodLine.match(/\.(\S*)/)[1]
-			const body = this[sMethod].toString().substring(0,50)
+			const body = this[sMethod].toString().substring(0, 50)
 			const args = body.match(/\((.*)\)/)[1].split(",")
-			for(let i = 0; i< args.length; i++){
+			for (let i = 0; i < args.length; i++) {
 				console.log(args[i] + " = " + inargs[i])
 			}
-			
+
 		}
 	}
-	getRootLine(sLine){
-		if(sLine.match(/^[@#]/)){
+	getRootLine(sLine) {
+		if (sLine.match(/^[@#]/)) {
 			return sLine[0] + sLine.substring(1).match(/^(.*?)([#@]\w*\s*)*$/)[1]
 		} else {
 			return sLine.match(/^(.*?)([#@]\w*\s*)*$/)[1]
 		}
 	}
-	cursorActivity(cm,xxy) {
+	cursorActivity(cm, xxy) {
 		// console.log(this.cursorActivity + "")
 		this.trace(arguments)
 		let currentLine = cm.getCursor().line;
@@ -182,29 +195,29 @@ class GDTEditor extends React.Component {
 					// this.diag("TAGZ " + tags.join("!"))
 					this.moveLine(this.lastLine, rootLine, tags)
 				}
-				
+
 			}
 		}
 		this.lastLine = currentLine;
-		
+
 	}
 	addCB(event, cb) {
 		let boundCB = cb.bind(this)
 		this.cm.on(event, boundCB)
 		this.callbacks.push({ event, boundCB });
 	}
-	disposeHandler(){
+	disposeHandler() {
 		console.log("I am disposed again!!! here!!")
 	}
 	initialize(cm) {
 		if (!this.lastLine) this.lastLine = 0;
 		if (!cm) return;
 		this.cm = cm.getCodeMirror();
-		if(module.hot){
+		if (module.hot) {
 			module.hot.addDisposeHandler(this.disposeHandler.bind(this))
 		}	// if(moduleInitialized) return;
-		
-	
+
+
 		for (let entry of this.callbacks) {
 			this.cm.off(entry.event, entry.boundCB)
 		}
@@ -259,7 +272,7 @@ class GDTEditor extends React.Component {
 			/>
 			<CodeMirror
 				ref={(entry) => { this.initialize(entry) }}
-	
+
 				options={options} />
 			<SocketStatus
 				returnTodo={this.returnTodo.bind(this)}
