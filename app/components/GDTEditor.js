@@ -1,4 +1,4 @@
-const React = require('react');
+const React = require('react'); //feature: react
 const CodeMirror = require('react-codemirror');
 import SocketStatus from "./socketStatus";
 require('codemirror/lib/codemirror.css');
@@ -8,23 +8,40 @@ const debounce = require("debounce")
 
 
 class GDTEditor extends React.Component {
+	//F: initialize
 	constructor(props) {
 		super(props);
 		this.state = { code: "//Test" }
 		this.callbacks = []
 
 	}
+	//F: sections, helpers
+	isSectionTest() {
+		let tests = {
+			"# test something": "#test"
+			, "## test something else": "#test"
+			, "## @test another": "@test"
+			, "## @@test another": false
+			, "Just stuff": false
+		};
+		for (key of tests) {
+			if (isSection(key) != tests[key]) {
+				console.log(`Failed ${key}=>${isSection(key)} is not ${tests[key]}`)
+			}
+		}
+	}
 	isSection(line) {
 		let matcher;
-		if (matcher = line.match(/^#*\s?(#|@)\s?(\w*)\s*(\/\/|$)/)) {
+		if (matcher = line.match(/^#*\s?([@#])\s?(\w*)\s*(\/\/|$)/)) {
 			return matcher[1][0] + matcher[2]
 		}
 		return false;
 	}
+	//F: sections, helpers
 	findSectionOfLine(n) {
 		this.makeSectionTable();
 		const keys = Object.keys(this.sectionTable);
-		let lastSection = "NONE"
+		let lastSection = "#IN"
 		for (const key of keys) {
 			if (n < this.sectionTable[key]) return lastSection;
 			lastSection = key;
@@ -32,7 +49,9 @@ class GDTEditor extends React.Component {
 		return lastSection;
 
 	}
+	//F: sections, helpers
 	makeSectionTable() {
+		this.tracePush(false)
 		if (this.sectionTable) return;
 		this.sectionTable = {}
 		const n = this.cm.lineCount()
@@ -47,12 +66,15 @@ class GDTEditor extends React.Component {
 				}
 			}
 		}
+		this.tracePop()
 	}
+	//F: sections, helpers
 	findSectionByName(sName) {
 		sName = sName.toLowerCase()
 		this.makeSectionTable()
 		return this.sectionTable[sName];
 	}
+	//F: sections, helpers
 	getTags(sLine) {
 		let regexp = /[#@](\w*)(\?|!|$)?/gi;
 		return sLine.match(regexp);
@@ -128,7 +150,7 @@ class GDTEditor extends React.Component {
 
 	moveLineFromPositionToTag(sLine, nSource, sTag) {
 		//ehcek to see if already there
-		if(this.findSectionOfLine(nSource) === sTag) return;
+		if (this.findSectionOfLine(nSource) === sTag) return;
 		let nTag = this.findSectionByName(sTag)
 		this.deleteLine(nSource)
 		if (nTag > nSource) nTag--;
@@ -138,7 +160,7 @@ class GDTEditor extends React.Component {
 
 	moveLine(nLine, sRoot, tags) {
 
-		let sLine = sRoot.trim().replace(/ +/g, ' ')  + " " + tags.join(" ");
+		let sLine = sRoot.trim().replace(/ +/g, ' ') + " " + tags.join(" ");
 		let moveLocs = "#Done,#Waiting,#Next,#Someday".split(",");
 		for (const loc of moveLocs) {
 			if (tags.indexOf(loc) != -1) {
@@ -153,6 +175,61 @@ class GDTEditor extends React.Component {
 	}
 	diag(sLine) {
 		this.insertLine(this.lastLine, sLine)
+	}
+	unTrace(name) {
+		delete this[name]
+	}
+
+	makeTrace(name) {
+		if (!this[name] || typeof this[name] != "function") {
+			console.log("undefined fn" + name)
+			return;
+		}
+		this.unTrace(name)
+		const body = this[name].toString().substring(0, 80)
+		const args = body.match(/\((.*)\)/)[1].split(",")
+		let tracedFn = (...tracedArgs) => {
+			this.traceDepth++
+			let results = []
+			for (let i = 0; i < args.length; i++) {
+				results.push(args[i] + "=" + tracedArgs[i])
+			}
+			let spaces = new Array(this.traceDepth - 1).join("  ")
+			this.tracePrint(spaces + `called ${name} (` + results.join(", ") + ")")
+			let result = this[name].original(...tracedArgs)
+			this.tracePrint(spaces + "returned " + result)
+			this.traceDepth--;
+		}
+		tracedFn = tracedFn.bind(this)
+		tracedFn.original = this[name].bind(this);
+		this.tracedFns.push(name)
+		this[name] = tracedFn;
+	}
+	tracePush(enable) {
+		this.traceStack.push(this.traceOutput)
+		this.traceOutput = enable
+		this.tracePrint(undefined)
+	}
+
+	tracePop() {
+		this.traceOutput = this.traceStack.pop()
+		if(!this.TraceOutput) this.traceBuffer = undefined;
+	}
+	tracePrint(string){
+		if(this.traceOutput && this.traceBuffer ){
+			console.log(this.traceBuffer)
+			this.traceBuffer = undefined
+		}
+		if(this.traceOutput) this.traceBuffer = string
+	}
+	unTraceAll() {
+		this.traceDepth = 0;
+		this.traceStack = []
+		this.traceOutput = true
+		if (!this.tracedFns) this.tracedFns = []
+		for (const name of this.tracedFns) {
+			this.unTrace(name)
+		}
 	}
 	trace(inargs) {
 		try {
@@ -176,11 +253,16 @@ class GDTEditor extends React.Component {
 			return sLine.match(/^(.*?)([#@]\w*\s*)*$/)[1]
 		}
 	}
-	cursorActivity(cm, xxy) {
+	cursorActivity(cm) {
 		// console.log(this.cursorActivity + "")
-		this.trace(arguments)
+		// let makeTrace = (fn) =>
+		// 	() trace()
+		// this.trace(arguments)
 		let currentLine = cm.getCursor().line;
-		if (currentLine === this.lastLine) return;
+		if (currentLine === this.lastLine){
+			this.traceClear()
+			return;
+		}
 		this.sectionTable = null;
 		let sLine = cm.getLine(this.lastLine);
 		if (!this.isSection(sLine)) {
@@ -208,6 +290,7 @@ class GDTEditor extends React.Component {
 	}
 	disposeHandler() {
 		console.log("I am disposed again!!! here!!")
+		this.unTraceAll()
 	}
 	initialize(cm) {
 		if (!this.lastLine) this.lastLine = 0;
@@ -216,8 +299,11 @@ class GDTEditor extends React.Component {
 		if (module.hot) {
 			module.hot.addDisposeHandler(this.disposeHandler.bind(this))
 		}	// if(moduleInitialized) return;
+		this.unTraceAll()
 
-
+		this.makeTrace("cursorActivity")
+		this.makeTrace("isSection")
+		// this.makeTrace("expandTags")
 		for (let entry of this.callbacks) {
 			this.cm.off(entry.event, entry.boundCB)
 		}

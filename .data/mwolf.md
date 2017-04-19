@@ -1,10 +1,45 @@
 # IN
+Add capabiliity to require a special symbol to move things
+Mail taxes
+Get paint
+Get Future perfect
+Resubmit proposal for Colloquy
+Check colloquys
+Check into serviceworker.js fails to work
+Push project out to Glitch and make it work
+Make Devtools replay work
+Move dock
+Check schedule on awninng
+Find about Codemirror snippets
+Add "Saving" while saving
+Make editing screen larger
+Conditionally hide the diagnostic panel
 
-This is a task @Phone
-@Read "Viking Economics"
+# Daily
+Plan
+750 words
+Recumbent
+Yoga
+Clear Inbox
+Meditation
+Exercise
+Close Tabs
+Yoga
+Post
+Photograph
+Forgiveness
+Gratitude
+EOD Review
+
+
+
 
 # Next
 # @Phone
+This is a task @Phone
+# @Read
+@Read "Viking Economics" @Read
+
 
 # Waiting
 Taxes accepted
