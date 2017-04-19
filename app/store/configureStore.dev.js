@@ -15,13 +15,13 @@ const persistedState = loadState();
     DevTools.instrument()
     
   );
-  // if (module.hot) {
-  //   // Enable Webpack hot module replacement for reducers
-  //   module.hot.accept('../reducers', () => {
-  //     const nextReducer = require('../reducers').default;
-  //     store.replaceReducer(nextReducer);
-  //   });
-  // }
+  if (module.hot) {
+    // Enable Webpack hot module replacement for reducers
+    module.hot.accept('../reducers', () => {
+      const nextReducer = require('../reducers').default;
+      store.replaceReducer(nextReducer);
+    });
+  }
   store.subscribe(throttle(() => {
     saveState(store.getState());
   }, 1000));
