@@ -194,11 +194,12 @@ class GDTEditor extends React.Component {
 			for (let i = 0; i < args.length; i++) {
 				results.push(args[i] + "=" + tracedArgs[i])
 			}
-			let spaces = new Array(this.traceDepth - 1).join("  ")
-			this.tracePrint(spaces + `called ${name} (` + results.join(", ") + ")")
+			let spaces = new Array(this.traceDepth - 1).join("..")
+			this.traceEnter(spaces + `called ${name} (` + results.join(", ") + ")")
 			let result = this[name].original(...tracedArgs)
-			this.tracePrint(spaces + "returned " + result)
+      		this.traceExit(spaces + "returned " + result + " from " + name)
 			this.traceDepth--;
+			return result;
 		}
 		tracedFn = tracedFn.bind(this)
 		tracedFn.original = this[name].bind(this);
@@ -215,6 +216,18 @@ class GDTEditor extends React.Component {
 		this.traceOutput = this.traceStack.pop()
 		if(!this.TraceOutput) this.traceBuffer = undefined;
 	}
+  traceClear(){
+    this.skipTrace = true
+  }
+  traceEnter(s){
+    this.traceBuffer = s;
+  }
+  traceExit(s){
+    if(this.skipTrace) {
+      this.traceBuffer = undefined;
+      this.skipTrace = false}
+    else this.tracePrint(s)
+  }
 	tracePrint(string){
 		if(this.traceOutput && this.traceBuffer ){
 			console.log(this.traceBuffer)
@@ -235,7 +248,6 @@ class GDTEditor extends React.Component {
 		try {
 			throw new Error()
 		} catch (e) {
-			console.clear()
 			const sMethodLine = e.stack.split("\n")[3]
 			const sMethod = sMethodLine.match(/\.(\S*)/)[1]
 			const body = this[sMethod].toString().substring(0, 50)
@@ -289,6 +301,7 @@ class GDTEditor extends React.Component {
 		this.callbacks.push({ event, boundCB });
 	}
 	disposeHandler() {
+		console.clear()
 		console.log("I am disposed again!!! here!!")
 		this.unTraceAll()
 	}
@@ -300,10 +313,13 @@ class GDTEditor extends React.Component {
 			module.hot.addDisposeHandler(this.disposeHandler.bind(this))
 		}	// if(moduleInitialized) return;
 		this.unTraceAll()
-
 		this.makeTrace("cursorActivity")
 		this.makeTrace("isSection")
-		// this.makeTrace("expandTags")
+		this.makeTrace("expandTags")
+		this.makeTrace("getRootLine")
+		this.makeTrace("validateTags")
+		this.makeTrace("moveLine")
+		this.makeTrace("removeDuplicates")
 		for (let entry of this.callbacks) {
 			this.cm.off(entry.event, entry.boundCB)
 		}
@@ -317,6 +333,7 @@ class GDTEditor extends React.Component {
 				return false
 			}
 		})
+	
 
 	}
 
@@ -333,7 +350,7 @@ class GDTEditor extends React.Component {
 	}
 
 	readTodos() {
-		this.setState({ user: this.textInput.value });
+		// this.setState({ user: this.textInput.value });
 		this.props.setUser(this.textInput.value);
 	}
 	returnTodo(todos) {
@@ -354,7 +371,6 @@ class GDTEditor extends React.Component {
 			<input
 				ref={(input) => { this.textInput = input }}
 				onKeyPress={this.checkEnter.bind(this)}
-				onBlur={this.readTodos.bind(this)}
 			/>
 			<CodeMirror
 				ref={(entry) => { this.initialize(entry) }}
