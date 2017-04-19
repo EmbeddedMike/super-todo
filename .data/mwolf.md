@@ -1,19 +1,19 @@
 # IN
 Add capabiliity to require a special symbol to move things
-Mail taxes
 Get paint
 Get Future perfect
-Resubmit proposal for Colloquy
 Check colloquys
 Check into serviceworker.js fails to work
-Push project out to Glitch and make it work
 Make Devtools replay work
 Move dock
 Check schedule on awninng
 Find about Codemirror snippets
 Add "Saving" while saving
-Make editing screen larger
+Make editing screen larger #GTDFlowx
 Conditionally hide the diagnostic panel
+
+
+# Bugs  
 
 # Daily
 Plan
@@ -35,6 +35,7 @@ EOD Review
 
 
 # Next
+Resubmit proposal for Colloquy #Next
 # @Phone
 This is a task @Phone
 # @Read
@@ -55,6 +56,8 @@ Process all the stuff in my Inbox todo list
 * Email Murnik re bus
 
 # Projects
+
+## GTDFlow
 
 ## Writing
 https://en.wikipedia.org/wiki/Metafiction
@@ -240,6 +243,8 @@ Read YZ article on Chosen People [here](https://medium.com/@yonatanzunger/a-chos
 
 
 # Done
+Push project out to Glitch and make it work #done
+Mail taxes #Done
 Write Kellianne
 Email Murnik
 Organize list
