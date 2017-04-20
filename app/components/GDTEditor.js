@@ -1,8 +1,17 @@
 const React = require('react'); //feature: react
 const CodeMirror = require('react-codemirror');
 import SocketStatus from "./socketStatus";
+require('codemirror/addon/dialog/dialog')
+require('codemirror/addon/search/searchcursor')
+require('codemirror/addon/search/search')
+// require('addon/scroll/annotatescrollbar.');
+// require('addon/search/matchesonscrollbar');
 require('codemirror/lib/codemirror.css');
 require('codemirror/mode/gfm/gfm');
+require("codemirror/addon/dialog/dialog.css");
+require('codemirror/addon/search/jump-to-line')
+require('codemirror/addon/search/match-highlighter')
+
 import { setUser } from "../actions/index.js"
 const debounce = require("debounce")
 
@@ -338,6 +347,7 @@ class GDTEditor extends React.Component {
 		this.cm.removeKeyMap("GTD");
 		this.cm.addKeyMap({
 			name: "GTD",
+			"Alt-F": "findPersistent",
 			"Ctrl-S": (cm) => {
 				this.props.editorAction("saveTodo");
 				return false
@@ -372,6 +382,7 @@ class GDTEditor extends React.Component {
 	render() {
 		var options = {
 			lineNumbers: true,
+			extraKeys: {},
 			mode: "gfm"
 		};
 
