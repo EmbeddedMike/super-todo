@@ -50,12 +50,42 @@ Process all the stuff in my Inbox todo list
 a task that did not exist #someshit
 
 ## GTDFlow
-Conditionally hide the diagnostic panel #GTDFlow
+Add user name to state
+Hook CtrlS and save GTD list
+Remove large "GTD List" **title**
+Add reducer to change name in state
+Move tagged items when moving off the line
+*# 1. Server to get todo list from .data #done
+** 3. client to push todolist to server #done
+** 4. and server to store todo list in .data #done
+* commit and push to glitch again
+* add  current todo list to local storage #
+
+## GTDFlowCosmetic
+Format input box
+Expand size of list
+Prompt for input box
+Move focus to document when read succeeds
+
+##GTDFLowFunctions
+Add Search ability
+Add folding to everything
 Save on timer #GTDFlow
+Automatically fold and unfold
+Saving box when saving
+* add MoveUp/Down and Mark Done keys
+* add Ctrl-K and hyperlinks
+
+Hide and show selected sections
+Command at top to render a view
+Conditionally hide the diagnostic panel #GTDFlow
 Make editing screen larger #GTDFlow
 Add "Saving" while saving #GTDFlow
 Check into serviceworker.js fails to work #GTDFlow
-Add capabiliity to require a special symbol to move things #GTDFlow
+Prompt with tags when #
+Add table at top
+* create a REST interface so that I can push/pull the list from glitch. That will let me work from all devices.
+* add @context #project.project and automatic sorting (when leaving the line)
 
 ## Writing
 https://en.wikipedia.org/wiki/Metafiction
@@ -64,33 +94,8 @@ Livejournal
 https://plus.google.com/u/0/105641292683040395669/posts/56k8nHo89Dq?cfem=1
 
 Javascript Modules all [about](https://medium.freecodecamp.com/javascript-modules-a-beginner-s-guide-783f7d7a5fcc)
-#### todolist
-Hook CtrlS and save GTD list
-Expand size of list
-Format input box
-Prompt for input box
-Remove large "GTD List" **title**
-Add user name to state
-Add reducer to change name in state
-Add folding to everything
-Automatically fold and unfold
-Move tagged items when moving off the line
-Prompt with tags when #
-Add table at top
-* todolist persists on server:
-*# 1. Server to get todo list from .data #done
-** 3. client to push todolist to server
-** 4. and server to store todo list in .data
-* commit and push to glitch again
-* add  current todo list to local storage #
-* add MoveUp/Down and Mark Done keys
-* create a REST interface so that I can push/pull the list from glitch. That will let me work from all devices.
-* add hook to process last/next line
-* Add markdown package
-* when leaving a line, change to markdown format
-* when entering a line, change to raw text
-* add Ctrl-K and hyperlinks
-* add @context #project.project and automatic sorting (when leaving the line)
+
+
 ### dev.ed
 
 React Training [course](https://online.reacttraining.com/courses/50507/lectures/2466461#/questions/1)
