@@ -360,7 +360,6 @@ class GDTEditor extends React.Component {
 		return this.cm.getValue();
 	}
 	render() {
-		console.log("render")
 		var options = {
 			lineNumbers: true,
 			mode: "gfm"
