@@ -139,6 +139,7 @@ class GDTEditor extends React.Component {
 					}
 					let moveLoc = this.findSectionByName(section)
 					this.insertLine(moveLoc, sLine)
+					this.sectionTable[tag] = moveLoc;
 				}
 				return tag;
 			}
@@ -152,9 +153,11 @@ class GDTEditor extends React.Component {
 		//ehcek to see if already there
 		if (this.findSectionOfLine(nSource) === sTag) return;
 		let nTag = this.findSectionByName(sTag)
-		this.deleteLine(nSource)
-		if (nTag > nSource) nTag--;
-		this.insertLine(nTag, sLine)
+		if(nTag){
+			this.deleteLine(nSource)
+			if (nTag > nSource) nTag--;
+			this.insertLine(nTag, sLine)
+		}
 
 	}
 
@@ -262,7 +265,7 @@ class GDTEditor extends React.Component {
 		if (sLine.match(/^[@#]/)) {
 			return sLine[0] + sLine.substring(1).match(/^(.*?)([#@]\w*\s*)*$/)[1]
 		} else {
-			return sLine.match(/^(.*?)([#@]\w*\s*)*$/)[1]
+			return sLine.match(/^(.*?)([#@][\w!\?]+\s*)*$/)[1]
 		}
 	}
 	cursorActivity(cm) {
@@ -287,7 +290,14 @@ class GDTEditor extends React.Component {
 				tags = this.validateTags(tags, this.lastLine);
 				if (tags.join("").indexOf("?") === -1) {
 					// this.diag("TAGZ " + tags.join("!"))
+					console.log(rootLine)
 					this.moveLine(this.lastLine, rootLine, tags)
+				} else {
+					sLine = rootLine + tags.join(" ")
+					this.cm.replaceRange( sLine, 
+					{ line: this.lastLine, ch: 0 },
+					{ line: this.lastLine, ch: null })
+					this.cm.setCursor({line: this.lastLine, ch: sLine.indexOf("?") + 1 })
 				}
 
 			}

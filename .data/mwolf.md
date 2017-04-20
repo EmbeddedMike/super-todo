@@ -1,16 +1,5 @@
 # IN
-Add capabiliity to require a special symbol to move things
-Get paint
-Get Future perfect
-Check colloquys
-Check into serviceworker.js fails to work
-Make Devtools replay work
-Move dock
-Check schedule on awninng
-Find about Codemirror snippets
-Add "Saving" while saving
-Make editing screen larger #GTDFlowx
-Conditionally hide the diagnostic panel
+
 
 
 # Bugs  
@@ -37,12 +26,13 @@ EOD Review
 # Next
 Resubmit proposal for Colloquy #Next
 # @Phone
-This is a task @Phone
+
 # @Read
 @Read "Viking Economics" @Read
 
 
 # Waiting
+Move dock #waiting
 Taxes accepted
 * Share Doc with JSG
 * Cancel Hulu @1May2017?
@@ -56,8 +46,16 @@ Process all the stuff in my Inbox todo list
 * Email Murnik re bus
 
 # Projects
+# someshit
+a task that did not exist #someshit
 
 ## GTDFlow
+Conditionally hide the diagnostic panel #GTDFlow
+Save on timer #GTDFlow
+Make editing screen larger #GTDFlow
+Add "Saving" while saving #GTDFlow
+Check into serviceworker.js fails to work #GTDFlow
+Add capabiliity to require a special symbol to move things #GTDFlow
 
 ## Writing
 https://en.wikipedia.org/wiki/Metafiction
@@ -81,7 +79,6 @@ Prompt with tags when #
 Add table at top
 * todolist persists on server:
 *# 1. Server to get todo list from .data #done
-** 2. client to request todolist from server #done
 ** 3. client to push todolist to server
 ** 4. and server to store todo list in .data
 * commit and push to glitch again
@@ -176,6 +173,7 @@ Create a “clone-project” script that does a git clone, cd, npm-install, code
 * Law and Code
 
 # Someday
+Find about Codemirror snippets #Someday
 Email Tim Seely
 
 Email Hendrik
@@ -243,6 +241,12 @@ Read YZ article on Chosen People [here](https://medium.com/@yonatanzunger/a-chos
 
 
 # Done
+** 2. client to request todolist from server #done
+Check schedule on awninng #Done
+Make Devtools replay work #Done
+Check colloquys #done
+Get Future perfect #done
+Get paint #Done
 Push project out to Glitch and make it work #done
 Mail taxes #Done
 Write Kellianne
@@ -318,3 +322,4 @@ John • Tue, 6:11 PM
 * refactor server for hot reloading #done
 Add patent pending to Scott #done
 Send taxes
+# Deleted
