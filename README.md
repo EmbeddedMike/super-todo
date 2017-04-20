@@ -1,5 +1,35 @@
 # GTDflow a GTD workflow program
-`GTDFlow` supports a smooth, efficient GTD workflow. Tasks flow from a category called `#IN` where new tasks arrive to a category `#Done` where completed tasks ends up. `GTDFlow` helps you keep your tasks organized and move them from group to group as you get them done.
+I wrote `GTDFlow` because I like the `GTD` idea, but I've gotten frustrated with every `GTD` system that I've used so far. They work, to a point. Then they become frustrating because, as my workflow stabilizes, they get in the way.
+
+`GTDFlow` was designed to help me use the prinicples behind `GTD` to help me get organized, and then to support my workflow once I was organized.
+
+The idea of workflow is an important one, and regular old `GTD` has several workflows built into it:
+
+1. Capturing everything in a single system.
+2. Processing new items and moving them to projects and contexts
+3. Marking things done, and getting rid of them (but not losing track of them!)
+4. Setting up daily, weekly, monthly and other recurring items
+4. Adding instances of recurring items to your lists
+5. Moving items from projects to your active contexts
+6. Moving things to Waiting, and remembering to check
+
+And so on.
+
+## The interface
+Classic `GTD` used lists and folders. Computerized versions use records in some kind of a database. Each item is a record, and you can select the one you want to move around, and then move around.
+
+`#GTDFlow` takes a different approach. Several, in fact. It has different interfaces for different kinds of devices, and different modes of use.
+
+`#GTDFlow` uses:
+
+0. A text interface for devices with keyboards. This is the workhorse interface for most review and organization tasks.
+1. A direct manipulation interface for devices that support touch. It's used for marking items as done, or moving items between lists.
+2. Speech to text for adding items with minimal effort.
+3. A camera interface, to make adding some items easier (one picture worth a thousand words)
+
+
+
+
 
 
 ## The template
