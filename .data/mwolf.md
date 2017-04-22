@@ -5,9 +5,9 @@
 # Bugs  
 
 # Daily
-Plan
-750 words
-Recumbent
+  Plan
+  750 words
+  Recumbent
 Yoga
 Clear Inbox
 Meditation
@@ -50,16 +50,7 @@ Process all the stuff in my Inbox todo list
 a task that did not exist #someshit
 
 ## GTDFlow
-Add user name to state
-Hook CtrlS and save GTD list
-Remove large "GTD List" **title**
-Add reducer to change name in state
-Move tagged items when moving off the line
-*# 1. Server to get todo list from .data #done
-** 3. client to push todolist to server #done
-** 4. and server to store todo list in .data #done
-* commit and push to glitch again
-* add  current todo list to local storage #
+Abbreviations to work with lower case
 
 ## GTDFlowCosmetic
 Format input box
@@ -76,6 +67,7 @@ Saving box when saving
 * add MoveUp/Down and Mark Done keys
 * add Ctrl-K and hyperlinks
 
+* add  current todo list to local storage 
 Hide and show selected sections
 Command at top to render a view
 Conditionally hide the diagnostic panel #GTDFlow
@@ -246,6 +238,15 @@ Read YZ article on Chosen People [here](https://medium.com/@yonatanzunger/a-chos
 
 
 # Done
+* commit and push to glitch again #Done
+Server to get todo list from .data #done
+** 4. and server to store todo list in .data #done
+Move tagged items when moving off the line #Done
+Add reducer to change name in state #Done
+Remove large "GTD List" **title** #Done
+Hook CtrlS and save GTD list #Done
+Add user name to state #Done
+** 3. client to push todolist to server #done
 ** 2. client to request todolist from server #done
 Check schedule on awninng #Done
 Make Devtools replay work #Done
