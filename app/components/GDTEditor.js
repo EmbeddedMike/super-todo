@@ -1,17 +1,25 @@
 const React = require('react'); //feature: react
 const CodeMirror = require('react-codemirror');
 import SocketStatus from "./socketStatus";
+const BaseCodeMirror = require('codemirror/lib/codemirror')
 require('codemirror/addon/dialog/dialog')
 require('codemirror/addon/search/searchcursor')
 require('codemirror/addon/search/search')
-// require('addon/scroll/annotatescrollbar.');
-// require('addon/search/matchesonscrollbar');
+require('codemirror/keymap/sublime')
+require('codemirror/addon/scroll/annotatescrollbar');
+require('codemirror/addon/search/matchesonscrollbar');
+require('codemirror/addon/search/matchesonscrollbar.css');
 require('codemirror/lib/codemirror.css');
 require('codemirror/mode/gfm/gfm');
 require("codemirror/addon/dialog/dialog.css");
 require('codemirror/addon/search/jump-to-line')
 require('codemirror/addon/search/match-highlighter')
+require('codemirror/addon/fold/foldcode')
+require('codemirror/addon/fold/foldgutter')
+require('codemirror/addon/fold/foldgutter.css')
+require('codemirror/addon/fold/indent-fold')
 
+require('../css/gtdflow.css')
 import { setUser } from "../actions/index.js"
 const debounce = require("debounce")
 
@@ -41,7 +49,7 @@ class GDTEditor extends React.Component {
 	}
 	isSection(line) {
 		let matcher;
-		if (matcher = line.match(/^#*\s?([@#])\s?(\w*)\s*(\/\/|$)/)) {
+		if (matcher = line.match(/^\s*#*\s?([@#])\s?(\w*)\s*(\/\/|$)/)) {
 			return matcher[1][0] + matcher[2]
 		}
 		return false;
@@ -62,7 +70,6 @@ class GDTEditor extends React.Component {
 	makeSectionTable() {
 		this.tracePush(false)
 		if (this.sectionTable) return;
-		this.sectionTable = {}
 		const n = this.cm.lineCount()
 		for (let i = 0; i < n; i++) {
 			let sName;
@@ -328,6 +335,7 @@ class GDTEditor extends React.Component {
 		if (!this.lastLine) this.lastLine = 0;
 		if (!cm) return;
 		this.cm = cm.getCodeMirror();
+		this.cm.setOption("fold", this.cm.constructor.fold.indent)
 		if (module.hot) {
 			module.hot.addDisposeHandler(this.disposeHandler.bind(this))
 		}	// if(moduleInitialized) return;
@@ -380,14 +388,21 @@ class GDTEditor extends React.Component {
 		return this.cm.getValue();
 	}
 	render() {
+		if (this.cm) console.log(this.cm.constructor)
 		var options = {
 			lineNumbers: true,
-			extraKeys: {},
-			mode: "gfm"
+			extraKeys: {	},
+			keyMap: "sublime",
+			mode: "gfm",
+			extraKeys: {"Ctrl-Q": function(cm){ 
+				cm.foldCode(cm.getCursor()); }},
+    		foldGutter: true,
+			fold: "indent",
+    		gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
 		};
 
 
-		return (<div>
+		return (<div >
 			<input
 				ref={(input) => { this.textInput = input }}
 				onKeyPress={this.checkEnter.bind(this)}
