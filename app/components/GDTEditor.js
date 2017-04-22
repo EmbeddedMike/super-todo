@@ -10,6 +10,7 @@ require('codemirror/addon/scroll/annotatescrollbar');
 require('codemirror/addon/search/matchesonscrollbar');
 require('codemirror/addon/search/matchesonscrollbar.css');
 require('codemirror/lib/codemirror.css');
+require('codemirror/addon/mode/simple');
 require('codemirror/mode/gfm/gfm');
 require("codemirror/addon/dialog/dialog.css");
 require('codemirror/addon/search/jump-to-line')
@@ -71,6 +72,7 @@ class GDTEditor extends React.Component {
 		this.tracePush(false)
 		if (this.sectionTable) return;
 		const n = this.cm.lineCount()
+		this.sectionTable = {}
 		for (let i = 0; i < n; i++) {
 			let sName;
 			if (sName = this.isSection(this.cm.getLine(i))) {
@@ -169,7 +171,7 @@ class GDTEditor extends React.Component {
 		//ehcek to see if already there
 		if (this.findSectionOfLine(nSource) === sTag) return;
 		let nTag = this.findSectionByName(sTag)
-		if(nTag){
+		if (nTag) {
 			this.deleteLine(nSource)
 			if (nTag > nSource) nTag--;
 			this.insertLine(nTag, sLine)
@@ -216,7 +218,7 @@ class GDTEditor extends React.Component {
 			let spaces = new Array(this.traceDepth - 1).join("..")
 			this.traceEnter(spaces + `called ${name} (` + results.join(", ") + ")")
 			let result = this[name].original(...tracedArgs)
-      		this.traceExit(spaces + "returned " + result + " from " + name)
+			this.traceExit(spaces + "returned " + result + " from " + name)
 			this.traceDepth--;
 			return result;
 		}
@@ -233,26 +235,27 @@ class GDTEditor extends React.Component {
 
 	tracePop() {
 		this.traceOutput = this.traceStack.pop()
-		if(!this.TraceOutput) this.traceBuffer = undefined;
+		if (!this.TraceOutput) this.traceBuffer = undefined;
 	}
-  traceClear(){
-    this.skipTrace = true
-  }
-  traceEnter(s){
-    this.traceBuffer = s;
-  }
-  traceExit(s){
-    if(this.skipTrace) {
-      this.traceBuffer = undefined;
-      this.skipTrace = false}
-    else this.tracePrint(s)
-  }
-	tracePrint(string){
-		if(this.traceOutput && this.traceBuffer ){
+	traceClear() {
+		this.skipTrace = true
+	}
+	traceEnter(s) {
+		this.traceBuffer = s;
+	}
+	traceExit(s) {
+		if (this.skipTrace) {
+			this.traceBuffer = undefined;
+			this.skipTrace = false
+		}
+		else this.tracePrint(s)
+	}
+	tracePrint(string) {
+		if (this.traceOutput && this.traceBuffer) {
 			console.log(this.traceBuffer)
 			this.traceBuffer = undefined
 		}
-		if(this.traceOutput) this.traceBuffer = string
+		if (this.traceOutput) this.traceBuffer = string
 	}
 	unTraceAll() {
 		this.traceDepth = 0;
@@ -290,7 +293,7 @@ class GDTEditor extends React.Component {
 		// 	() trace()
 		// this.trace(arguments)
 		let currentLine = cm.getCursor().line;
-		if (currentLine === this.lastLine){
+		if (currentLine === this.lastLine) {
 			this.traceClear()
 			return;
 		}
@@ -310,10 +313,10 @@ class GDTEditor extends React.Component {
 					this.moveLine(this.lastLine, rootLine, tags)
 				} else {
 					sLine = rootLine + tags.join(" ")
-					this.cm.replaceRange( sLine, 
-					{ line: this.lastLine, ch: 0 },
-					{ line: this.lastLine, ch: null })
-					this.cm.setCursor({line: this.lastLine, ch: sLine.indexOf("?") + 1 })
+					this.cm.replaceRange(sLine,
+						{ line: this.lastLine, ch: 0 },
+						{ line: this.lastLine, ch: null })
+					this.cm.setCursor({ line: this.lastLine, ch: sLine.indexOf("?") + 1 })
 				}
 
 			}
@@ -335,7 +338,7 @@ class GDTEditor extends React.Component {
 		if (!this.lastLine) this.lastLine = 0;
 		if (!cm) return;
 		this.cm = cm.getCodeMirror();
-		this.cm.setOption("fold", this.cm.constructor.fold.indent)
+		// this.cm.setOption("fold", this.cm.constructor.fold.indent)
 		if (module.hot) {
 			module.hot.addDisposeHandler(this.disposeHandler.bind(this))
 		}	// if(moduleInitialized) return;
@@ -347,6 +350,11 @@ class GDTEditor extends React.Component {
 		this.makeTrace("validateTags")
 		this.makeTrace("moveLine")
 		this.makeTrace("removeDuplicates")
+
+		this.sectionTable = null
+		this.makeSectionTable();
+
+
 		for (let entry of this.callbacks) {
 			this.cm.off(entry.event, entry.boundCB)
 		}
@@ -357,11 +365,31 @@ class GDTEditor extends React.Component {
 			name: "GTD",
 			"Alt-F": "findPersistent",
 			"Ctrl-S": (cm) => {
+				console.log("CTRLS")
+				const startConfig = this.findSectionByName("#configstart");
+				const endConfig = this.findSectionByName("#configend");
+				console.log(startConfig, endConfig)
+				this.cm.setOption("mode", "gfm")
+				if (startConfig >= 0 && endConfig) {
+					this.config = this.cm.getRange({ line: startConfig + 1, ch: 0 }, { line: endConfig - 1, ch: null })
+					console.log("GOT CONFIG")
+					console.log(this.config);
+					try {
+						eval(this.config)
+					} catch (e) {
+						console.log(e)
+					}
+					
+					// this.cm.setOption("mode", "gfm")
+					setTimeout( () =>{
+						cm.setOption("mode", "simplemode")
+						console.log("MODE SET")}, 1000);
+				}
 				this.props.editorAction("saveTodo");
 				return false
 			}
 		})
-	
+
 
 	}
 
@@ -391,14 +419,16 @@ class GDTEditor extends React.Component {
 		if (this.cm) console.log(this.cm.constructor)
 		var options = {
 			lineNumbers: true,
-			extraKeys: {	},
+			extraKeys: {},
 			keyMap: "sublime",
-			mode: "gfm",
-			extraKeys: {"Ctrl-Q": function(cm){ 
-				cm.foldCode(cm.getCursor()); }},
-    		foldGutter: true,
+			extraKeys: {
+				"Ctrl-Q": function (cm) {
+					cm.foldCode(cm.getCursor());
+				}
+			},
+			foldGutter: true,
 			fold: "indent",
-    		gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
 		};
 
 
