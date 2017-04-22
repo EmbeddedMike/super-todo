@@ -1,4 +1,4 @@
-# configstarts
+# configstart
 /* Example definition of a simple mode that understands a subset of
  * JavaScript:
  */
@@ -7,6 +7,8 @@ BaseCodeMirror.defineSimpleMode("simplemode", {
   // The start state contains the rules that are intially used
   start: [
     // The regex matches the token, the token property contains the type
+    
+    {regex: /"(?:[^\\]|\\.)*?(?:"|$)/, token: "string"},
     {regex: /"(?:[^\\]|\\.)*?(?:"|$)/, token: "string"},
     // You can match multiple tokens at once. Note that the captured
     // groups must span the whole string in this case

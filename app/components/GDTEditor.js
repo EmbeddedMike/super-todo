@@ -365,25 +365,17 @@ class GDTEditor extends React.Component {
 			name: "GTD",
 			"Alt-F": "findPersistent",
 			"Ctrl-S": (cm) => {
-				console.log("CTRLS")
 				const startConfig = this.findSectionByName("#configstart");
 				const endConfig = this.findSectionByName("#configend");
-				console.log(startConfig, endConfig)
-				this.cm.setOption("mode", "gfm")
+				// this.cm.setOption("mode", "gfm")
 				if (startConfig >= 0 && endConfig) {
 					this.config = this.cm.getRange({ line: startConfig + 1, ch: 0 }, { line: endConfig - 1, ch: null })
-					console.log("GOT CONFIG")
-					console.log(this.config);
 					try {
 						eval(this.config)
 					} catch (e) {
 						console.log(e)
 					}
-					
-					// this.cm.setOption("mode", "gfm")
-					setTimeout( () =>{
-						cm.setOption("mode", "simplemode")
-						console.log("MODE SET")}, 1000);
+					cm.setOption("mode", "simplemode")
 				}
 				this.props.editorAction("saveTodo");
 				return false
