@@ -4,3 +4,10 @@
 .cm-header{
     font-size: 20px;
 }
+.cm-error{
+    font-size: 20px;
+}
+.cm-category, .cm-context{
+    color: blue;
+    font-size: 20px;
+}

@@ -299,6 +299,7 @@ class GDTEditor extends React.Component {
 		}
 		this.sectionTable = null;
 		let sLine = cm.getLine(this.lastLine);
+		return;
 		if (!this.isSection(sLine)) {
 			let tags = this.getTags(sLine);
 			if (tags && tags.length > 0) {
@@ -367,15 +368,20 @@ class GDTEditor extends React.Component {
 			"Ctrl-S": (cm) => {
 				const startConfig = this.findSectionByName("#configstart");
 				const endConfig = this.findSectionByName("#configend");
-				// this.cm.setOption("mode", "gfm")
+				this.cm.setOption("mode", "gfm")
 				if (startConfig >= 0 && endConfig) {
 					this.config = this.cm.getRange({ line: startConfig + 1, ch: 0 }, { line: endConfig - 1, ch: null })
+
 					try {
 						eval(this.config)
 					} catch (e) {
 						console.log(e)
 					}
-					cm.setOption("mode", "simplemode")
+					
+					// this.cm.setOption("mode", "none")
+					setTimeout( () =>{
+						cm.setOption("mode", "simplemode")
+						console.log("MODE SET")}, 1000);
 				}
 				this.props.editorAction("saveTodo");
 				return false

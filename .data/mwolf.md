@@ -1,39 +1,27 @@
+// this 
+Example with a #next?
+Example with a #er
+//some stuff
+Example with @phone 
 # configstart
+
 /* Example definition of a simple mode that understands a subset of
  * JavaScript:
  */
-
+console.clear()
 BaseCodeMirror.defineSimpleMode("simplemode", {
   // The start state contains the rules that are intially used
   start: [
-    // The regex matches the token, the token property contains the type
-    
-    {regex: /"(?:[^\\]|\\.)*?(?:"|$)/, token: "string"},
-    {regex: /"(?:[^\\]|\\.)*?(?:"|$)/, token: "string"},
-    // You can match multiple tokens at once. Note that the captured
-    // groups must span the whole string in this case
-    {regex: /(function)(\s+)([a-z$][\w$]*)/,
-     token: ["keyword", null, "variable-2"]},
-    // Rules are matched in the order in which they appear, so there is
-    // no ambiguity between this one and the one above
-    {regex: /(?:function|var|return|if|for|while|else|do|this)\b/,
-     token: "keyword"},
-    {regex: /true|false|null|undefined/, token: "atom"},
-    {regex: /0x[a-f\d]+|[-+]?(?:\.\d+|\d+\.?\d*)(?:e[-+]?\d+)?/i,
-     token: "number"},
-    {regex: /\/\/.*/, token: "comment"},
-    {regex: /\/(?:[^\\]|\\.)*?\//, token: "variable-3"},
-    // A next property will cause the mode to move to a different state
-    {regex: /\/\*/, token: "comment", next: "comment"},
-    {regex: /[-+\/*=<>!]+/, token: "operator"},
-    // indent and dedent properties guide autoindentation
-    {regex: /[\{\[\(]/, indent: true},
-    {regex: /[\}\]\)]/, dedent: true},
-    {regex: /[a-z$][\w$]*/, token: "variable"},
-    // You can embed other modes with the mode property. This rule
-    // causes all code between << and >> to be highlighted with the XML
-    // mode.
-    {regex: /<</, token: "meta", mode: {spec: "xml", end: />>/}}
+     {regex: /\s*#.*$/, token: "header", sol: true},
+     {regex: /\/\*/, token: "comment", next: "comment"},
+     {regex: /\/\/.*/, token: "comment"},
+     {regex: /([\w\s])+/, token: "string"},
+     {regex: /([#@]\w+\?)/, token: "error"},
+     {regex: /(@\w+)/, token: "context"},
+     {regex: /(#\w+)/, token: "category"},
+     
+     
+     
   ],
   // The multi-line comment state.
   comment: [
@@ -49,7 +37,6 @@ BaseCodeMirror.defineSimpleMode("simplemode", {
     lineComment: "//"
   }
 });
-
 
 # configend
 
