@@ -7,7 +7,7 @@ import SliderMonitor from "redux-slider-monitor"
 export default createDevTools(
 	<DockMonitor toggleVisibilityKey='ctrl-h'
 		changeMonitorKey='ctrl-m'
-		changePositionKey='ctrl-q'
+		changePositionKey='alt-q'
 		defaultSize={0.2}>
 		<LogMonitor />
 		<SliderMonitor keyboardEnabled />
