@@ -11,7 +11,8 @@ require('codemirror/addon/search/matchesonscrollbar');
 require('codemirror/addon/search/matchesonscrollbar.css');
 require('codemirror/lib/codemirror.css');
 require('codemirror/addon/mode/simple');
-require('codemirror/mode/gfm/gfm');
+require('codemirror/mode/javascript/javascript');
+require('codemirror/addon/mode/multiplex');
 require("codemirror/addon/dialog/dialog.css");
 require('codemirror/addon/search/jump-to-line')
 require('codemirror/addon/search/match-highlighter')
@@ -364,20 +365,21 @@ class GDTEditor extends React.Component {
 		this.cm.removeKeyMap("GTD");
 		this.cm.addKeyMap({
 			name: "GTD",
-			"Alt-F": "findPersistent",
+			"Ctrl-F": "findPersistent",
 			"Ctrl-S": (cm) => {
 				const startConfig = this.findSectionByName("#configstart");
 				const endConfig = this.findSectionByName("#configend");
+				console.clear()
 				this.cm.setOption("mode", "gfm")
 				if (startConfig >= 0 && endConfig) {
 					this.config = this.cm.getRange({ line: startConfig + 1, ch: 0 }, { line: endConfig - 1, ch: null })
 
 					try {
-						eval(this.config)
+						eval("(_this) => {" + this.config + "}")(this)
 					} catch (e) {
 						console.log(e)
 					}
-					
+					if(this.testFunction) this.testFunction("param")
 					// this.cm.setOption("mode", "none")
 					setTimeout( () =>{
 						cm.setOption("mode", "simplemode")
@@ -424,8 +426,7 @@ class GDTEditor extends React.Component {
 					cm.foldCode(cm.getCursor());
 				}
 			},
-			foldGutter: true,
-			fold: "indent",
+			foldGutter: {rangeFinder: BaseCodeMirror.fold.indent},
 			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
 		};
 

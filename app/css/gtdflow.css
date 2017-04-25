@@ -7,7 +7,16 @@
 .cm-error{
     font-size: 20px;
 }
-.cm-category, .cm-context{
+.cm-category,  .cm-context{
     color: blue;
     font-size: 20px;
+}
+.cm-markdownlink{
+    color: green;
+    background-color: #ddd;
+}
+.cm-markdowntarget{
+    color: blue;
+    background-color: #ddd;
+ ;
 }
