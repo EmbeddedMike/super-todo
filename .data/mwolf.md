@@ -1,29 +1,62 @@
+# Newest
+Ctrl-F to make the search persistent.
+Make the search incremental
+[Dummy's guide to Redux Thunk](https://medium.com/@stowball/a-dummys-guide-to-redux-and-thunk-in-react-d8904a7005d3)
+[Redux Js Async actions](http://redux.js.org/docs/advanced/AsyncActions.html)
+Sometimes save action fails #GTDFlowBug
+[Structor Documentation](https://github.com/ipselon/structor/blob/master/docs/README.md)
+[Phenomic](https://phenomic.io/showcase/)
+[Gatsby React Web Hosting](https://github.com/gatsbyjs/gatsby)
+Parse MarkDown links and render/undrender them
+[Custom domain with Github pages](https://help.github.com/articles/using-a-custom-domain-with-github-pages/)
+[Github pages](https://pages.github.com)
+[NGrok tunnels to localhost](https://ngrok.com/product)
+[The Moral Animal](https://www.amazon.com/Robert-Wright/e/B000AP9O2U/ref=dp_byline_cont_book_1)
+
 // this 
 Example with a #next?
 Example with a #er
 //some stuff
 Example with @phone 
 # configstart
-
+BaseCodeMirror.defineMode("simplemode", function(config) {
+  return BaseCodeMirror.multiplexingMode(
+    BaseCodeMirror.getMode(config, "GTDFlow"),
+    {open: "# configstart",
+     close: "# " + "configend",
+     mode: BaseCodeMirror.getMode(config, "text/javascript"),
+     delimStyle: "delimit"}
+    // .. more multiplexed styles can follow here
+  );
+});
 /* Example definition of a simple mode that understands a subset of
  * JavaScript:
  */
-console.clear()
-BaseCodeMirror.defineSimpleMode("simplemode", {
+ console.log("FOLD", BaseCodeMirror.fold)
+console.log("This is", _this)
+_this.testFunction = (param) => {
+  console.log("THE TEST IS NOT", param);
+  }
+
+BaseCodeMirror.defineSimpleMode("GTDFlow", {
   // The start state contains the rules that are intially used
   start: [
      {regex: /\s*#.*$/, token: "header", sol: true},
      {regex: /\/\*/, token: "comment", next: "comment"},
      {regex: /\/\/.*/, token: "comment"},
-     {regex: /([\w\s])+/, token: "string"},
+     {regex: /([\w\s])+/, token: "normal"},
      {regex: /([#@]\w+\?)/, token: "error"},
      {regex: /(@\w+)/, token: "context"},
      {regex: /(#\w+)/, token: "category"},
-     
+     {regex: /(\[.*\])/, token: "markdownlink", next: "linktarget"},
      
      
   ],
   // The multi-line comment state.
+  linktarget:[
+    {regex: /(\(.*\))/, token: "markdowntarget", next: "start"},
+    {regex: /.*/, token: "error", next:"start"}
+    ],
   comment: [
     {regex: /.*?\*\//, token: "comment", next: "start"},
     {regex: /.*/, token: "comment"}
@@ -34,7 +67,8 @@ BaseCodeMirror.defineSimpleMode("simplemode", {
   // specific to simple modes.
   meta: {
     dontIndentStates: ["comment"],
-    lineComment: "//"
+    lineComment: "//",
+    fold: "indent"
   }
 });
 
@@ -50,32 +84,32 @@ BaseCodeMirror.defineSimpleMode("simplemode", {
   Plan
   750 words
   Recumbent
-Yoga
-Clear Inbox
-Meditation
-Exercise
-Close Tabs
-Yoga
-Post
-Photograph
-Forgiveness
-Gratitude
-EOD Review
+  Yoga
+  Clear Inbox
+  Meditation
+  Exercise
+  Close Tabs
+  Yoga
+  Post
+  Photograph
+  Forgiveness
+  Gratitude
+  EOD Review
 
 
 
 
 # Next
-Resubmit proposal for Colloquy #Next
+	Resubmit proposal for Colloquy
 # @Phone
 
 # @Read
-@Read "Viking Economics" @Read
+@Read "Viking Economics"
 
 
 # Waiting
 Move dock #waiting
-Taxes accepted
+Taxes accepted #Done
 * Share Doc with JSG
 * Cancel Hulu @1May2017?
 Callback from big jay
