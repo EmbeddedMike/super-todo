@@ -2,6 +2,7 @@ const React = require('react'); //feature: react
 const CodeMirror = require('react-codemirror');
 import SocketStatus from "./socketStatus";
 const BaseCodeMirror = require('codemirror/lib/codemirror')
+import CodeEditor from "./CodeEditor"
 require('codemirror/addon/dialog/dialog')
 require('codemirror/addon/search/searchcursor')
 require('codemirror/addon/search/search')
@@ -300,8 +301,8 @@ class GDTEditor extends React.Component {
 		}
 		this.sectionTable = null;
 		let sLine = cm.getLine(this.lastLine);
-		if(this.cursorActivityOff) return;
-		
+		if (this.cursorActivityOff) return;
+
 		if (!this.isSection(sLine)) {
 			if (this.compressMarkup) {
 				this.compressMarkup();
@@ -383,11 +384,12 @@ class GDTEditor extends React.Component {
 					} catch (e) {
 						console.log(e)
 					}
-					if(this.testFunction) this.testFunction("param")
+					if (this.testFunction) this.testFunction("param")
 					// this.cm.setOption("mode", "none")
-					setTimeout( () =>{
+					setTimeout(() => {
 						cm.setOption("mode", "simplemode")
-						console.log("MODE SET")}, 1000);
+						console.log("MODE SET")
+					}, 1000);
 				}
 				this.props.editorAction("saveTodo");
 				return false
@@ -430,25 +432,28 @@ class GDTEditor extends React.Component {
 					cm.foldCode(cm.getCursor());
 				}
 			},
-			foldGutter: {rangeFinder: BaseCodeMirror.fold.indent},
+			foldGutter: { rangeFinder: BaseCodeMirror.fold.indent },
 			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
 		};
 
 
-		return (<div >
-			<input
-				ref={(input) => { this.textInput = input }}
-				onKeyPress={this.checkEnter.bind(this)}
-			/>
-			<CodeMirror
-				ref={(entry) => { this.initialize(entry) }}
+		return (<div className="gdtContainer" >
+			<div className="gdtEditor">
+				<input
+					ref={(input) => { this.textInput = input }}
+					onKeyPress={this.checkEnter.bind(this)}
+				/>
+				<CodeMirror
+					ref={(entry) => { this.initialize(entry) }}
 
-				options={options} />
-			<SocketStatus
-				returnTodo={this.returnTodo.bind(this)}
-				getTodo={this.getTodo.bind(this)}
+					options={options} />
+				<SocketStatus
+					returnTodo={this.returnTodo.bind(this)}
+					getTodo={this.getTodo.bind(this)}
 
-			/>
+				/>
+			</div>
+			<CodeEditor gdtEditor={this} className="gdtCode"/>
 		</div>)
 	}
 };

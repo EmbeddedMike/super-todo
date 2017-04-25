@@ -24,3 +24,13 @@
     margin-top: -15px;
     margin-left: 5px;
  }
+ .gdtContainer {
+     display: grid;
+     grid-template: "gdt code" 1fr/50% 50%;
+ }
+.gdtCode {
+    grid-area: code;
+}
+.gdtEditor {
+    grid-area: gdt;
+}
