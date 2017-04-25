@@ -14,11 +14,53 @@ Parse MarkDown links and render/undrender them
 [The Moral Animal](https://www.amazon.com/Robert-Wright/e/B000AP9O2U/ref=dp_byline_cont_book_1)
 
 // this 
-Example with a #next?
-Example with a #er
+Example with a #er??
 //some stuff
-Example with @phone 
 # configstart
+console.log("YAY");
+
+_this.deleteNode  = (node) => {
+  
+}
+
+_this.deleteLogs = () => {
+  let logs = document.getElementsByClassName("logdata");
+  let list = []
+  let log;
+  for(log of logs){
+    list.push(log)
+  }
+  while(log = list.pop()){
+    
+    
+    log.parentElement.removeChild(log)
+  }
+  
+}
+
+_this.log = (text) =>{
+  _this.widgets = []
+  let line = _this.cm.getCursor().line
+ 
+  let ch = _this.cm.getLine(line).length
+  // let pixel = _this.cm.charCoords({line, ch: null})
+  let node = document.createElement("span")
+  node.innerHTML = text
+  node.className = "logdata";
+  
+  let widget = _this.cm.addWidget({line: line,ch: ch}, node)
+  
+  setTimeout( () => node.parentElement.removeChild(node), 1000 );
+}
+
+_this.deleteLogs()
+
+_this.compressMarkup = () =>{
+    _this.log("Stuff goes here");
+  
+}
+
+_this.cursorActivityOff = false
 BaseCodeMirror.defineMode("simplemode", function(config) {
   return BaseCodeMirror.multiplexingMode(
     BaseCodeMirror.getMode(config, "GTDFlow"),
@@ -100,8 +142,10 @@ BaseCodeMirror.defineSimpleMode("GTDFlow", {
 
 
 # Next
+Example with a #next
 	Resubmit proposal for Colloquy
 # @Phone
+Example with @phone
 
 # @Read
 @Read "Viking Economics"
