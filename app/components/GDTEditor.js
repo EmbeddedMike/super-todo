@@ -300,8 +300,12 @@ class GDTEditor extends React.Component {
 		}
 		this.sectionTable = null;
 		let sLine = cm.getLine(this.lastLine);
-		return;
+		if(this.cursorActivityOff) return;
+		
 		if (!this.isSection(sLine)) {
+			if (this.compressMarkup) {
+				this.compressMarkup();
+			}
 			let tags = this.getTags(sLine);
 			if (tags && tags.length > 0) {
 				let rootLine = this.getRootLine(sLine)

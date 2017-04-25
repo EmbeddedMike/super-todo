@@ -18,5 +18,9 @@
 .cm-markdowntarget{
     color: blue;
     background-color: #ddd;
- ;
 }
+.logdata {
+    background-color: palegoldenrod;
+    margin-top: -15px;
+    margin-left: 5px;
+ }
