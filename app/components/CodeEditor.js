@@ -1,6 +1,8 @@
 const React = require('react'); //feature: react
 const CodeMirror = require('react-codemirror');
 import SocketStatus from "./socketStatus";
+const Babel = require("babel-standalone")
+console.log("babel", Babel)
 const BaseCodeMirror = require('codemirror/lib/codemirror')
 require('codemirror/addon/dialog/dialog')
 require('codemirror/addon/search/searchcursor')
@@ -35,15 +37,17 @@ class CodeEditor extends React.Component {
 
     }
     addCB(event, cb) {
-		let boundCB = cb.bind(this)
-		this.cm.on(event, boundCB)
-		this.callbacks.push({ event, boundCB });
-	}   
+        let boundCB = cb.bind(this)
+        this.cm.on(event, boundCB)
+        this.callbacks.push({ event, boundCB });
+    }
+    cursorActivity(cm) {
+
+    }
     initialize(cm) {
         if (!this.lastLine) this.lastLine = 0;
         if (!cm) return;
         this.cm = cm.getCodeMirror();
-        console.log("GDTEditor", this.props.gdtEditor)
         // this.cm.setOption("fold", this.cm.constructor.fold.indent)
         if (module.hot) {
             // module.hot.addDisposeHandler(this.disposeHandler.bind(this))
@@ -55,17 +59,50 @@ class CodeEditor extends React.Component {
         this.callbacks = []
         this.addCB("cursorActivity", debounce(this.cursorActivity, 50, true))
         this.cm.removeKeyMap("GTD");
+        let saveCode = (cm) => {
+            // let lolizer = () => {
+            //     return {
+            //         visitor: {
+            //             Identifier(path) {
+            //                 path.node.name = 'LOL';
+            //             }
+            //         }
+            //     }
+            // }
+            // Babel.registerPlugin('lolizer', lolizer);
+            let source = this.cm.getValue();
+            try {
+                // let func = "(param)=> {" + source + "}"
+                let func = `
+                    (param)=> {
+                            let something = "a variable"
+                            let something_else = "another"
+                            console.log('STUFF');
+                            console.log(this);
+                            return <div>this is JSX</div>
+                        }
+                    `
+                console.clear()
+                let output = Babel.transform(func,
+                    {
+                        // plugins: ['lolizer'], 
+                        presets: [["es2015", { modules: false }],"react"] }
+                )
+                console.log("code is ", func)
+                console.log("output is ", output.code)
+                let code = eval(output.code).bind(this);
+
+                code(this);
+
+            } catch (e) {
+                console.log(e)
+            }
+        }
+        saveCode()
         this.cm.addKeyMap({
             name: "GTD",
             "Ctrl-F": "findPersistent",
-            "Ctrl-S": (cm) => {
-                let code = this.cm.getValue();
-                try {
-                    eval("(_this) => {" + this.config + "}")(this)
-                } catch (e) {
-                    console.log(e)
-                }
-            }
+            "Ctrl-S": saveCode.bind(this)
         })
     }
     render() {
@@ -92,3 +129,83 @@ class CodeEditor extends React.Component {
     }
 }
 export default CodeEditor;
+
+/*
+let _this = this
+_this.deleteNode  = (node) => {
+  
+}
+
+_this.deleteLogs = () => {
+  let logs = document.getElementsByClassName("logdata");
+  if(logs.length === 0) return;
+  let list = []
+  let log;
+  for(log of logs){
+    list.push(log)
+  }
+  while(log = list.pop()){
+    
+    
+    log.parentElement.removeChild(log)
+  }
+  
+}
+
+_this.logLines = []
+
+_this.callerLine = () =>{
+  try{
+    throw new Error()
+  }
+  catch(e) {
+    let callerLine = e.stack.split("\n")[3];
+    callerLine = callerLine.split(",")[1]
+    return (callerLine.match(/(\d+)/)[1]) - 1  
+  }
+}
+
+_this.logData = (value) => {
+  let line = _this.callerLine()
+  let values = _this.logLines[line]
+  if(!values){
+    _this.logLines[line] = values = []
+  }
+  values.push(value);
+}
+
+_this.logAtLine = (line, text) =>{
+  _this.widgets = []
+
+  //let line = _this.cm.getCursor().line
+ 
+  let ch = _this.cm.getLine(line).length
+  // let pixel = _this.cm.charCoords({line, ch: null})
+  let node = document.createElement("span")
+  node.innerHTML = text
+  node.className = "logdata";
+  
+  let widget = _this.cm.addWidget({line: line,ch: ch}, node)
+  console.log(line, ch, text);
+  //setTimeout( () => node.parentElement.removeChild(node), 1000 );
+}
+_this.deleteLogs();
+for( let i = 0; i < 10; i++ ){
+  _this.logData(i);
+}
+_this.logData("I am right here");
+_this.dumpData = () => {
+  let values = _this.logLines;
+  let n = values.length;
+  for( let i = 0; i< n; i++){
+    let value = values[i]
+    if( value ) {
+      console.log(value, i)
+      _this.logAtLine( i, value);
+    }
+  }
+}
+_this.dumpData();
+console.log("ran")
+
+*/
