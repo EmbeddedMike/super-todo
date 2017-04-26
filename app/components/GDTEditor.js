@@ -422,7 +422,7 @@ class GDTEditor extends React.Component {
 		return this.cm.getValue();
 	}
 	render() {
-		if (this.cm) console.log(this.cm.constructor)
+		// if (this.cm) console.log(this.cm.constructor)
 		var options = {
 			lineNumbers: true,
 			extraKeys: {},
