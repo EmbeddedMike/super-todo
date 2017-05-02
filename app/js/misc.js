@@ -1,5 +1,46 @@
 let _this = this
+let commandList = [];
+let startTime = new Date();
+let execCommand = (cmd) => {
+    console.log(cmd);
+	this.cm.execCommand(cmd)
+}
+let rerunCommands = () => {
+  let n = commandList.length
+  for( let i = 0; i < n; i++ ){
+    let entry = commandList[i]
+    setTimeout( () => execCommand(entry.command), entry.time)
+  }
+}
+let makeFunction = (commands, key) => {
+  let oldFn = commands[key]
+  let newFn = (cm) => {
+    commandList.push({time: (new Date() - startTime), command: key});
+    return oldFn(cm)
+  }
+  newFn.oldFn = oldFn
+  commands[key] = newFn
+}
+let restoreFunction = (commands, key) => {
+  commands[key] = commands[key].oldFn
+}
 
+let doCommands = (fn) => {
+  let commands = BaseCodeMirror.commands
+  let keys = Object.keys(commands)
+  let n = keys.length;
+  for(let i = 0; i < n; i++) {
+    fn(commands,keys[i])
+  }
+}
+let restoreCommands = () =>{
+  console.log("restore")
+  doCommands(restoreFunction);
+  rerunCommands()
+}
+setTimeout( restoreCommands, 3000);
+doCommands(makeFunction)
+return
 class CMLogger {
   constructor(cm) {
     this.cm = cm
