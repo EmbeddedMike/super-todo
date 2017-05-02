@@ -7,6 +7,8 @@ const BaseCodeMirror = require('codemirror/lib/codemirror')
 require('codemirror/addon/dialog/dialog')
 require('codemirror/addon/search/searchcursor')
 require('codemirror/addon/search/search')
+
+let SourceMap = require("source-map")
 require('codemirror/keymap/sublime')
 require('codemirror/addon/scroll/annotatescrollbar');
 require('codemirror/addon/search/matchesonscrollbar');
@@ -66,11 +68,11 @@ class CodeEditor extends React.Component {
             //             Identifier(path) {
             //                 path.node.name = 'LOL';
             //             }
-            //         }
-            //     }
+            //         }//     }
             // }
             // Babel.registerPlugin('lolizer', lolizer);
             let source = this.cm.getValue();
+            source = "(source,output,SourceMap) => {" + source + "}"
             try {
                 // let func = "(param)=> {" + source + "}"
                 let func = `
@@ -83,18 +85,26 @@ class CodeEditor extends React.Component {
                         }
                     `
                 console.clear()
-                let output = Babel.transform(func,
+                let output = Babel.transform(source,
                     {
                         // plugins: ['lolizer'], 
-                        presets: [["es2015", { modules: false }],"react"] }
+                        presets: [["es2015", { modules: false }],
+                        "react"],
+                        sourceMap: "both",
+                        filename: "client"
+                    },
                 )
-                console.log("code is ", func)
-                console.log("output is ", output.code)
-                let code = eval(output.code).bind(this);
-
-                code(this);
+                try {
+                    console.log("EVAL")
+                    let code = eval(output.code).bind(this);
+                    code(   source,output,SourceMap);
+                } catch (e){
+                    console.log(e)
+                }
 
             } catch (e) {
+                console.log("Error")
+                if(this.showError) this.showError(e)
                 console.log(e)
             }
         }
