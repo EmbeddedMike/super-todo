@@ -2,7 +2,6 @@ const React = require('react'); //feature: react
 const CodeMirror = require('react-codemirror');
 import SocketStatus from "./socketStatus";
 const Babel = require("babel-standalone")
-console.log("babel", Babel)
 const BaseCodeMirror = require('codemirror/lib/codemirror')
 require('codemirror/addon/dialog/dialog')
 require('codemirror/addon/search/searchcursor')
@@ -10,7 +9,6 @@ require('codemirror/addon/search/search')
 let SourceMap = require("source-map")
 require('codemirror/keymap/sublime')
 import throttle from 'lodash/throttle';
-console.log(throttle)   
 require('codemirror/addon/scroll/annotatescrollbar');
 require('codemirror/addon/search/matchesonscrollbar');
 require('codemirror/addon/search/matchesonscrollbar.css');
@@ -27,6 +25,7 @@ require('codemirror/addon/fold/foldgutter.css')
 require('codemirror/addon/fold/indent-fold')
 
 require('../css/gtdflow.css')
+import CMLogger from '../js/cmlogger'
 import { setUser } from "../actions/index.js"
 const debounce = require("debounce")
 
@@ -67,7 +66,8 @@ class CodeEditor extends React.Component {
             // }
             // Babel.registerPlugin('lolizer', lolizer);
             let source = this.cm.getValue();
-            source = "(source,output,SourceMap,GDTEditor,CodeEditor,throttle) => {" + source + "}"
+            
+            source = "(exported) => {" + source + "}"
             try {
                 // let func = "(param)=> {" + source + "}"
                 let func = `
@@ -90,9 +90,14 @@ class CodeEditor extends React.Component {
                     },
                 )
                 try {
-                    console.log("EVAL")
+                    console.log("EVALING")
                     let code = eval(output.code).bind(this);
-                    code(   source,output,SourceMap, this.props.gdtEditor, this, throttle);
+                    let Logger = new CMLogger(this.cm, output.map);
+                    let exported = {source,output,
+                        SourceMap,GDTEditor:this.props.gdtEditor,CodeEditor,
+                        throttle,debounce,Logger}
+
+                    code( exported );
                 } catch (e){
                     console.log(e)
                 }

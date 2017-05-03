@@ -1,9 +1,16 @@
-class CMLogger {
-    constructor(cm) {
+let debounce = require("debounce")
+let SourceMap = require("source-map")
+export default class CMLogger {
+//class CMLogger {
+    constructor(cm, map) {
         this.cm = cm
         this.logLines = []
         this.smcs = []
-
+        this.addSourceMap(map, 0)
+        this.deleteLogs()
+        this.cm.Logger = this;
+        this.log = this.log.bind(this)
+        this.showData = debounce(this.showData.bind(this), 100)
     }
     
     deleteByClass(className) {
@@ -13,7 +20,6 @@ class CMLogger {
           let log = logs[i]
           log.parentElement.removeChild(log)
         }
-     
     }
     deleteLogs(){
       this.deleteByClass("logdata")
@@ -30,8 +36,7 @@ class CMLogger {
         node.className = className;
 
         let widget = this.cm.addWidget({ line: line, ch: ch }, node)
-        //console.log(line, ch, text);
-        //setTimeout( () => node.parentElement.removeChild(node), 1000 );
+  
     }
     showData() {
         let values = this.logLines;
@@ -50,6 +55,7 @@ class CMLogger {
             this.logLines[line] = values = []
         }
         values.push(value);
+        this.showData()
     }
 
     addSourceMap(map, offset) {
@@ -81,11 +87,12 @@ class CMLogger {
             return this.getPosition({ line, column })
         }
     }
-    CL(output) {
+    log(output) {
         let line = this.getCallerLine(1);
         //console.log(line, output)
         this.logDataAt(line, output)
     }
+    
     getCallerLine(n) {
         let stackFrames = new Error().stack.split("\n")
         return this.parseStackFrame(stackFrames[2 + n]).line
@@ -96,25 +103,17 @@ class CMLogger {
       let message = stackFrames[0]
       this.logAtLine(line, message, "errormessage")
     }
-
 }
 
-console.clear()
-
-let L = new CMLogger(this.cm);
-L.addSourceMap(output.map, 0)
-L.deleteLogs()
-let CL = L.CL.bind(L)
-CL("Thisis")
-
-try {
-  throw new Error("WOW");
-}catch (e){
-  
-  
-  L.displayError(e);
+if(false){
+  console.clear()
+  debounce = exported.debounce
+  let Logger = new CMLogger(this.cm, exported.output.map);
+  let log = this.cm.Logger.log
+  log("This is it a teest")
+  try {
+    throw new Error("WOW");
+  }catch (e){
+    Logger.displayError(e);
+  }
 }
-
-
-L.showData()
-
