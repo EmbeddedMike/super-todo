@@ -23,6 +23,14 @@
     background-color: palegoldenrod;
     margin-top: -15px;
     margin-left: 5px;
+    z-index: 2;
+ }
+ .errormessage {
+    background-color: palevioletred;
+    border: 1px solid black;
+    z-index: 2;
+    margin-top: -15px;
+    margin-left: 5px;
  }
  .gdtContainer {
      display: grid;
