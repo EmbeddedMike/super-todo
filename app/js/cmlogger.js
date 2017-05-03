@@ -1,43 +1,48 @@
 let debounce = require("debounce")
 let SourceMap = require("source-map")
 export default class CMLogger {
-//class CMLogger {
+    //class CMLogger {
     constructor(cm, map) {
         this.cm = cm
         this.logLines = []
         this.smcs = []
         this.addSourceMap(map, 0)
-        this.deleteLogs()
+        this.clearLogs()
         this.cm.Logger = this;
         this.log = this.log.bind(this)
         this.showData = debounce(this.showData.bind(this), 100)
     }
-    
-    deleteByClass(className) {
+
+    clearByClass(className) {
         let logs = document.getElementsByClassName(className);
         let n = logs.length
-        for (let i = 0; i< n; i++) {
-          let log = logs[i]
-          log.parentElement.removeChild(log)
+        for (let i = 0; i < n; i++) {
+            let log = logs[i]
+            log.parentElement.removeChild(log)
         }
     }
-    deleteLogs(){
-      this.deleteByClass("logdata")
-      this.deleteByClass("errormessage");
+    clearLogs() {
+        this.clearByClass("logdata")
+        this.clearByClass("errormessage");
     }
-  	logAtLine(line, text, className = "logdata") {
-        this.widgets = []
-
-
+    logErrorAtLine(line, text) {
+        this.logAtLine(line, text, "errormessage")
+    }
+    logMessageAtLine(line, text) {
+        this.logAtLine(line, text, "logdata")
+    }
+    logAtLine(line, text, className) {
         let ch = this.cm.getLine(line).length
-
+        this.logAtPos({ line, ch }, text, className)
+    }
+    logAtPos(pos, text, className) {
+        console.log("POSITION", pos)
         let node = document.createElement("span")
         node.innerHTML = text
         node.className = className;
-
-        let widget = this.cm.addWidget({ line: line, ch: ch }, node)
-  
+        this.cm.addWidget(pos, node)
     }
+    
     showData() {
         let values = this.logLines;
         let n = values.length;
@@ -45,7 +50,7 @@ export default class CMLogger {
             let value = values[i]
             if (value) {
                 //console.log(value, i)
-                this.logAtLine(i - 1, value);
+                this.logMessageAtLine(i - 1, value);
             }
         }
     }
@@ -92,28 +97,28 @@ export default class CMLogger {
         //console.log(line, output)
         this.logDataAt(line, output)
     }
-    
+
     getCallerLine(n) {
         let stackFrames = new Error().stack.split("\n")
         return this.parseStackFrame(stackFrames[2 + n]).line
     }
-    displayError(e){
-      let stackFrames = e.stack.split("\n")
-  	  let line = this.parseStackFrame(stackFrames[1]).line - 1
-      let message = stackFrames[0]
-      this.logAtLine(line, message, "errormessage")
+    displayError(e) {
+        let stackFrames = e.stack.split("\n")
+        let line = this.parseStackFrame(stackFrames[1]).line - 1
+        let message = stackFrames[0]
+        this.logErrorAtLine(line, message)
     }
 }
 
-if(false){
-  console.clear()
-  debounce = exported.debounce
-  let Logger = new CMLogger(this.cm, exported.output.map);
-  let log = this.cm.Logger.log
-  log("This is it a teest")
-  try {
-    throw new Error("WOW");
-  }catch (e){
-    Logger.displayError(e);
-  }
+if (false) {
+    console.clear()
+    debounce = exported.debounce
+    let Logger = new CMLogger(this.cm, exported.output.map);
+    let log = this.cm.Logger.log
+    log("This is it a teest")
+    try {
+        throw new Error("WOW");
+    } catch (e) {
+        Logger.displayError(e);
+    }
 }

@@ -46,31 +46,50 @@ class CodeEditor extends React.Component {
     onChange(cm) {
         this.modChange(cm)
     }
-    modChange(cm){
-        console.log("MOD")
+    modChange = debounce((cm) => {
+        this.cm.Logger.clearLogs()
+        this.saveCode();
+        //setTimeout( this.clearError.bind(this), 2000)
+    }, 500, false)
+
+    showError(e) {
+        let eLine = e.stack.split("\n")[0];
+        console.log(eLine);
+        let matcher = eLine.match(/^(.*):\s(.*):(.*)\((\d+):(\d+)/)
+        if (matcher) {
+            let message = matcher[1] + " " + matcher[3]
+            let line = +matcher[4]
+            line = line - 1
+            console.log("LINE", line);
+            let ch = +matcher[5]
+            message = "<pre>" + Array(ch).join(" ") + "^ </pre>" + message
+            this.cm.Logger.logAtPos({ line, ch: 0 }, message, "errormessage")
+        } else {
+            this.cm.Logger.logAtPos(this.cm.getCursor(), eLine, "errormessage")
+        }
     }
     cursorActivity(cm) {
         this.actuallyMoved(cm)
     }
-    actuallyMoved(cm){
+    actuallyMoved(cm) {
         console.log("actually moved")
     }
-    saveCode(cm)  {
-            // let lolizer = () => {
-            //     return {
-            //         visitor: {
-            //             Identifier(path) {
-            //                 path.node.name = 'LOL';
-            //             }
-            //         }//     }
-            // }
-            // Babel.registerPlugin('lolizer', lolizer);
-            let source = this.cm.getValue();
-            
-            source = "(exported) => {" + source + "}"
-            try {
-                // let func = "(param)=> {" + source + "}"
-                let func = `
+    saveCode(cm) {
+        // let lolizer = () => {
+        //     return {
+        //         visitor: {
+        //             Identifier(path) {
+        //                 path.node.name = 'LOL';
+        //             }
+        //         }//     }
+        // }
+        // Babel.registerPlugin('lolizer', lolizer);
+        let source = this.cm.getValue();
+
+        source = "(exported) => {\n" + source + "}"
+        try {
+            // let func = "(param)=> {" + source + "}"
+            let func = `
                     (param)=> {
                             let something = "a variable"
                             let something_else = "another"
@@ -79,35 +98,37 @@ class CodeEditor extends React.Component {
                             return <div>this is JSX</div>
                         }
                     `
-                //console.clear()
-                let output = Babel.transform(source,
-                    {
-                        // plugins: ['lolizer'], 
-                        presets: [["es2015", { modules: false }],
+            //console.clear()
+            let output = Babel.transform(source,
+                {
+                    // plugins: ['lolizer'], 
+                    presets: [["es2015", { modules: false }],
                         "react"],
-                        sourceMap: "both",
-                        filename: "client"
-                    },
-                )
-                try {
-                    console.log("EVALING")
-                    let code = eval(output.code).bind(this);
-                    let Logger = new CMLogger(this.cm, output.map);
-                    let exported = {source,output,
-                        SourceMap,GDTEditor:this.props.gdtEditor,CodeEditor,
-                        throttle,debounce,Logger}
-
-                    code( exported );
-                } catch (e){
-                    console.log(e)
+                    sourceMap: "both",
+                    filename: "client"
+                },
+            )
+            try {
+                console.log("EVALING")
+                let code = eval(output.code).bind(this);
+                let Logger = new CMLogger(this.cm, output.map);
+                let exported = {
+                    source, output,
+                    SourceMap, GDTEditor: this.props.gdtEditor, CodeEditor,
+                    throttle, debounce, Logger
                 }
 
+                code(exported);
             } catch (e) {
-                console.log("Error")
-                if(this.showError) this.showError(e)
                 console.log(e)
             }
+
+        } catch (e) {
+            console.log("Error")
+            if (this.showError) this.showError(e)
+            console.log(e)
         }
+    }
     initialize(cm) {
         if (!this.lastLine) this.lastLine = 0;
         if (!cm) return;
@@ -123,7 +144,7 @@ class CodeEditor extends React.Component {
         this.callbacks = []
         this.addCB("cursorActivity", debounce(this.cursorActivity, 50, true))
         this.cm.removeKeyMap("GTD");
-        
+
         this.saveCode()
         this.cm.addKeyMap({
             name: "GTD",
