@@ -32,6 +32,7 @@ export default class CMLogger {
         this.logAtLine(line, text, "logdata")
     }
     logAtLine(line, text, className) {
+        console.log("LINE")
         let ch = this.cm.getLine(line).length
         this.logAtPos({ line, ch }, text, className)
     }
@@ -106,7 +107,7 @@ export default class CMLogger {
         let stackFrames = e.stack.split("\n")
         let line = this.parseStackFrame(stackFrames[1]).line - 1
         let message = stackFrames[0]
-        this.logErrorAtLine(line, message)
+        this.logErrorAtLine(line - 1, message)
     }
 }
 

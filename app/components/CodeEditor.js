@@ -120,6 +120,7 @@ class CodeEditor extends React.Component {
 
                 code(exported);
             } catch (e) {
+                this.showRuntimeError(e);
                 console.log(e)
             }
 
@@ -128,6 +129,9 @@ class CodeEditor extends React.Component {
             if (this.showError) this.showError(e)
             console.log(e)
         }
+    }
+    showRuntimeError(){
+        
     }
     initialize(cm) {
         if (!this.lastLine) this.lastLine = 0;
