@@ -18,7 +18,10 @@ export default class CMLogger {
         let n = logs.length
         for (let i = 0; i < n; i++) {
             let log = logs[i]
-            log.parentElement.removeChild(log)
+            if(log && log.parentElement)
+              log.parentElement.removeChild(log)
+            else
+              console.log("missing parent", log)
         }
     }
     clearLogs() {
@@ -32,12 +35,11 @@ export default class CMLogger {
         this.logAtLine(line, text, "logdata")
     }
     logAtLine(line, text, className) {
-        console.log("LINE")
+        line--;
         let ch = this.cm.getLine(line).length
         this.logAtPos({ line, ch }, text, className)
     }
     logAtPos(pos, text, className) {
-        console.log("POSITION", pos)
         let node = document.createElement("span")
         node.innerHTML = text
         node.className = className;
@@ -107,7 +109,7 @@ export default class CMLogger {
         let stackFrames = e.stack.split("\n")
         let line = this.parseStackFrame(stackFrames[1]).line - 1
         let message = stackFrames[0]
-        this.logErrorAtLine(line - 1, message)
+        this.logErrorAtLine(line, message)
     }
 }
 

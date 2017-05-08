@@ -23,7 +23,9 @@ require('codemirror/addon/fold/foldcode')
 require('codemirror/addon/fold/foldgutter')
 require('codemirror/addon/fold/foldgutter.css')
 require('codemirror/addon/fold/indent-fold')
-
+require('codemirror/addon/hint/show-hint')
+require('codemirror/addon/hint/javascript-hint')
+require('codemirror/addon/hint/anyword-hint')
 require('../css/gtdflow.css')
 import CMLogger from '../js/cmlogger'
 import { setUser } from "../actions/index.js"
@@ -46,11 +48,13 @@ class CodeEditor extends React.Component {
     onChange(cm) {
         this.modChange(cm)
     }
-    modChange = debounce((cm) => {
-        this.cm.Logger.clearLogs()
-        this.saveCode();
-        //setTimeout( this.clearError.bind(this), 2000)
-    }, 500, false)
+    // debouncedCompile = debounce((cm) =>
+    //     this.compileCode(cm), 100);
+    // modChange = debounce((cm) => {
+    //     this.cm.Logger.clearLogs()
+    //     this.debouncedCompile(cm)
+    //     //setTimeout( this.clearError.bind(this), 2000)
+    // }, 50, false)
 
     showError(e) {
         let eLine = e.stack.split("\n")[0];
@@ -60,7 +64,6 @@ class CodeEditor extends React.Component {
             let message = matcher[1] + " " + matcher[3]
             let line = +matcher[4]
             line = line - 1
-            console.log("LINE", line);
             let ch = +matcher[5]
             message = "<pre>" + Array(ch).join(" ") + "^ </pre>" + message
             this.cm.Logger.logAtPos({ line, ch: 0 }, message, "errormessage")
@@ -72,20 +75,59 @@ class CodeEditor extends React.Component {
         this.actuallyMoved(cm)
     }
     actuallyMoved(cm) {
-        console.log("actually moved")
+        //console.log("actually moved")
     }
+    adjustSource(source) {
+        return source
+    }
+    simpleAdjustSource(source) {
+        return source
+    }
+    oldAdjustSource = true
     saveCode(cm) {
-        // let lolizer = () => {
-        //     return {
-        //         visitor: {
-        //             Identifier(path) {
-        //                 path.node.name = 'LOL';
-        //             }
-        //         }//     }
-        // }
-        // Babel.registerPlugin('lolizer', lolizer);
-        let source = this.cm.getValue();
+        this.debouncedCompile = debounce((cm) =>
+            this.compileCode(cm), 100);
+        this.modChange = debounce((cm) => {
+            this.cm.Logger.clearLogs()
+            this.debouncedCompile(cm)
+            //setTimeout( this.clearError.bind(this), 2000)
+        }, 50, false)
+        if (!this.oldAdjustSource) {
+            this.adjustSource = this.simpleAdjustSource
+            console.log("restored")
+            this.oldAdjustSource = !this.oldAdjustSource
+            return;
+        }
+        this.oldAdjustSource = !this.oldAdjustSource
+        this.compileCode(cm)
+    }
 
+    compileCode(cm) {
+        let source = this.cm.getValue();
+        let aLines = source.split("\n")
+        let n = aLines.length
+        let sTop = ""
+        let sBottom = ""
+        let i = 0;
+        let aSplit = (i, n) => {
+            let aGroup = []
+            for (; i < n; i++) {
+                let line = aLines[i]
+                if (line.match(/\/\/\s*SPLIT/)) {
+                    break
+                }
+                aGroup[i] = line
+            }
+            return [i, aGroup.join("\n")]
+        }
+        [i, sTop] = aSplit(0, n)
+        let offset = i + 1
+        let result = [i, sBottom] = aSplit(offset, n)
+//        source = this.adjustSource(source)
+        this.compileAndRun(sTop, 0, true)
+        this.compileAndRun(sBottom,0, false)
+    }
+    compileAndRun(source,offset,initial){
         source = "(exported) => {\n" + source + "}"
         try {
             // let func = "(param)=> {" + source + "}"
@@ -111,7 +153,14 @@ class CodeEditor extends React.Component {
             try {
                 console.log("EVALING")
                 let code = eval(output.code).bind(this);
-                let Logger = new CMLogger(this.cm, output.map);
+                let Logger
+                if(initial){
+                    Logger = new CMLogger(this.cm, output.map);
+                } 
+                else {
+                    Logger = this.cm.Logger
+                    this.cm.Logger.addSourceMap(output.map,offset)
+                }
                 let exported = {
                     source, output,
                     SourceMap, GDTEditor: this.props.gdtEditor, CodeEditor,
@@ -125,13 +174,13 @@ class CodeEditor extends React.Component {
             }
 
         } catch (e) {
-            console.log("Error")
-            if (this.showError) this.showError(e)
+            console.log("Show Error")
+            this.showError(e)
             console.log(e)
         }
     }
-    showRuntimeError(){
-        
+    showRuntimeError(e) {
+        this.cm.Logger.displayError(e)
     }
     initialize(cm) {
         if (!this.lastLine) this.lastLine = 0;
@@ -159,12 +208,13 @@ class CodeEditor extends React.Component {
     render() {
         var options = {
             lineNumbers: true,
-            extraKeys: {},
+            extraKeys: { "Ctrl-Space": "autocomplete" },
             keyMap: "sublime",
             extraKeys: {
                 "Ctrl-Q": function (cm) {
                     cm.foldCode(cm.getCursor());
-                }
+                },
+                "Ctrl-Space": "autocomplete"
             },
             foldGutter: { rangeFinder: BaseCodeMirror.fold.indent },
             gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
