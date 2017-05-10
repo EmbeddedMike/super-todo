@@ -31,7 +31,9 @@ import CMLogger from '../js/cmlogger'
 import { setUser } from "../actions/index.js"
 const debounce = require("debounce")
 
-
+window.onbeforeunload = function() {
+  return "Are you sure you want to navigate away?";
+}
 class CodeEditor extends React.Component {
     //F: initialize
     constructor(props) {
@@ -164,7 +166,7 @@ class CodeEditor extends React.Component {
                 let exported = {
                     source, output,
                     SourceMap, GDTEditor: this.props.gdtEditor, CodeEditor,
-                    throttle, debounce, Logger
+                    throttle, debounce, Logger,BabelLibs
                 }
 
                 code(exported);
@@ -182,6 +184,17 @@ class CodeEditor extends React.Component {
     showRuntimeError(e) {
         this.cm.Logger.displayError(e)
     }
+    gutterClick(cm, line, gutter, event){
+        let element = document.createElement("div")
+        let classes = "breakdot, breakpoint, arrow".split(",")
+        if(this.nextClass === undefined){
+            this.nextClass = 0
+        } else {
+            this.nextClass = (this.nextClass + 1) % 3
+        }
+        element.setAttribute("class", classes[this.nextClass])
+        cm.getDoc().setGutterMarker(line, gutter, element)
+    }
     initialize(cm) {
         if (!this.lastLine) this.lastLine = 0;
         if (!cm) return;
@@ -197,7 +210,7 @@ class CodeEditor extends React.Component {
         this.callbacks = []
         this.addCB("cursorActivity", debounce(this.cursorActivity, 50, true))
         this.cm.removeKeyMap("GTD");
-
+        this.addCB("gutterClick", this.gutterClick)
         this.saveCode()
         this.cm.addKeyMap({
             name: "GTD",
@@ -217,7 +230,10 @@ class CodeEditor extends React.Component {
                 "Ctrl-Space": "autocomplete"
             },
             foldGutter: { rangeFinder: BaseCodeMirror.fold.indent },
-            gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+            gutters: ["CodeMirror-linenumbers",
+            "CodeMirror-foldgutter",
+             "breakpoint-gutter", 
+             "arrow-gutter"]
         };
 
         return (<div className="codeEditor">

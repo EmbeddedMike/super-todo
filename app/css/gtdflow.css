@@ -42,3 +42,40 @@
 .gdtEditor {
     grid-area: gdt;
 }
+.breakpoint-gutter {
+    width: 0.7em;
+}
+.arrow-gutter{
+width: 0.7em;
+}
+.breakpoint, .breakdot {
+
+	border-radius: 50%;
+	width: 0.7em;
+	height: 0.7em;
+    background-color: green;
+    
+    margin: 2px 1px 0px -2px;
+    border: 1px solid black;
+
+	/* width and height can be anything, as long as they're equal */
+}
+
+.breakpoint {
+    background-color: red;
+	/* width and height can be anything, as long as they're equal */
+}
+.breakdot {
+	
+    background-color: green;
+	/* width and height can be anything, as long as they're equal */
+}
+.arrow {
+	width: 0; 
+	height: 0; 
+	border-bottom: 0.7em solid transparent;  /* left arrow slant */
+	border-top: 0.7em solid transparent; /* right arrow slant */
+	border-left: 0.7em solid blue; /* bottom, add background color here */
+	font-size: 9pt;
+	line-height: 0;
+}
