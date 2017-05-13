@@ -12,7 +12,18 @@ export default class CMLogger {
         this.log = this.log.bind(this)
         this.showData = debounce(this.showData.bind(this), 100)
     }
-
+    addBGClass(line,className){
+        this.cm.addLineClass(line - 1, "background", className)
+    }
+    removeBGClass(line,className){
+        this.cm.removeLineClass(line - 1, "background", className)
+    }
+    removeBGClassAll(className){
+        this.cm.eachLine( handle => {
+        let line = this.cm.getLineNumber(handle)
+        this.removeBGClass(line,className);
+        })
+    }
     clearByClass(className) {
         let logs = document.getElementsByClassName(className);
         let n = logs.length
@@ -35,7 +46,6 @@ export default class CMLogger {
         this.logAtLine(line, text, "logdata")
     }
     logAtLine(line, text, className) {
-        line--;
         let ch = this.cm.getLine(line).length
         this.logAtPos({ line, ch }, text, className)
     }
@@ -53,7 +63,7 @@ export default class CMLogger {
             let value = values[i]
             if (value) {
                 //console.log(value, i)
-                this.logMessageAtLine(i - 1, value);
+                this.logMessageAtLine(i, value);
             }
         }
     }
@@ -107,7 +117,7 @@ export default class CMLogger {
     }
     displayError(e) {
         let stackFrames = e.stack.split("\n")
-        let line = this.parseStackFrame(stackFrames[1]).line - 1
+        let line = this.parseStackFrame(stackFrames[1]).line
         let message = stackFrames[0]
         this.logErrorAtLine(line, message)
     }
