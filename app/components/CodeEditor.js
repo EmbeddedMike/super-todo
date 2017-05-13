@@ -166,7 +166,7 @@ class CodeEditor extends React.Component {
                 let exported = {
                     source, output,
                     SourceMap, GDTEditor: this.props.gdtEditor, CodeEditor,
-                    throttle, debounce, Logger,BabelLibs
+                    throttle, debounce, Logger
                 }
 
                 code(exported);
@@ -185,15 +185,7 @@ class CodeEditor extends React.Component {
         this.cm.Logger.displayError(e)
     }
     gutterClick(cm, line, gutter, event){
-        let element = document.createElement("div")
-        let classes = "breakdot, breakpoint, arrow".split(",")
-        if(this.nextClass === undefined){
-            this.nextClass = 0
-        } else {
-            this.nextClass = (this.nextClass + 1) % 3
-        }
-        element.setAttribute("class", classes[this.nextClass])
-        cm.getDoc().setGutterMarker(line, gutter, element)
+        this.gutterClick1(cm, line, gutter, event )
     }
     initialize(cm) {
         if (!this.lastLine) this.lastLine = 0;
@@ -232,8 +224,8 @@ class CodeEditor extends React.Component {
             foldGutter: { rangeFinder: BaseCodeMirror.fold.indent },
             gutters: ["CodeMirror-linenumbers",
             "CodeMirror-foldgutter",
-             "breakpoint-gutter", 
-             "arrow-gutter"]
+            "arrow-gutter",
+            "breakpoint-gutter"]
         };
 
         return (<div className="codeEditor">
