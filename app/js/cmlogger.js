@@ -10,7 +10,13 @@ export default class CMLogger {
         this.clearLogs()
         this.cm.Logger = this;
         this.log = this.log.bind(this)
+        this.displayError = this.displayError.bind(this)
         this.showData = debounce(this.showData.bind(this), 100)
+        this.mapping = []
+    }
+    setMapping(mapping){
+        console.log("Mapping set in " + this.cmLogger)
+        this.mapping = mapping
     }
     addBGClass(line,className){
         this.cm.addLineClass(line - 1, "background", className)
@@ -106,9 +112,15 @@ export default class CMLogger {
         }
     }
     log(output) {
+        // console.log(this.mapping)
         let line = this.getCallerLine(1);
         //console.log(line, output)
-        this.logDataAt(line, output)
+        let logLine = line - 2
+        this.logDataAt(logLine , output)
+        let altLine = this.mapping[logLine];
+        if(altLine){
+            this.logDataAt(altLine , output)
+        }
     }
 
     getCallerLine(n) {
@@ -119,7 +131,12 @@ export default class CMLogger {
         let stackFrames = e.stack.split("\n")
         let line = this.parseStackFrame(stackFrames[1]).line
         let message = stackFrames[0]
-        this.logErrorAtLine(line, message)
+        let logLine = line -2
+        this.logErrorAtLine(logLine, message)
+        let altLine = this.mapping[logLine];
+        if(altLine){
+            this.logErrorAtLine(altLine , message)
+        }
     }
 }
 
