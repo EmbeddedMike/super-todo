@@ -213,13 +213,13 @@ class CodeEditor extends React.Component {
     render() {
         var options = {
             lineNumbers: true,
-            extraKeys: { "Ctrl-Space": "autocomplete" },
             keyMap: "sublime",
             extraKeys: {
                 "Ctrl-Q": function (cm) {
                     cm.foldCode(cm.getCursor());
                 },
-                "Ctrl-Space": "autocomplete"
+                "Ctrl-Space": "autocomplete",
+                'Tab': 'insertSoftTab' 
             },
             foldGutter: { rangeFinder: BaseCodeMirror.fold.indent },
             gutters: ["CodeMirror-linenumbers",
