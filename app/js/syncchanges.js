@@ -2,42 +2,58 @@ console.clear()
 let log = this.cm.Logger.log.bind(Logger)
 Logger.logMessageAtLine = Logger.logMessageAtLine.bind(Logger)
 
-
+let test = () => {
 let L = this.cm.Logger;
+let thisCM = this.cm
+let onChange = (cm) => {
+  console.log("change");
+}
+let onCursor = (cm) => {
+  console.log(c.ChangeLoc)
+  c.inChange()
 
-//log('here') 
+  console.log("cursor");
+} 
 
-let test = () =>{
-  
+let debounce = exported.debounce
+onChange = debounce(onChange,100);
+onCursor = debounce(onCursor,100);
+let recall = (event, cb) =>{
+  let cm = this.cm
+  let uncall = () => {
+    console.log(event + " off")
+    cm.off(event, cb)
+  }
+  setTimeout(uncall, 5000) 
+  cm.on(event, cb)
+}
+
+recall("cursorActivity", onCursor);
+recall("change", onChange); 
 
 let c = new Changer(this.cm)
 console.log("STASRT")
 let changeLoc = c.findChange()
+console.log(c.changeLoc)
 console.log(changeLoc)
+
 c.scanBody(changeLoc.end + 1)
 console.log(c.locationMap)
-c.setMappings() 
+//c.replaceChange(changeLoc)
+//c.setMappings() 
 //c.showMaps()
 //c.blueLine(4)
 
-
-
-
-let change = ()=> {
-
  
-}
+let change = ()=> {
+              //endpattern:
+    {
+    }
+    //end:
+
 
 }
-//
-//  
-/*
-0. Locate the change object, or create a new, empty one.
-1. Detect when I've created a new location comment and create a new corresponding change key, and fill out a default (empty) body.
-2. Detect when the cursor is in a location comment or within the body of a location comment (this will be true right after creating one), find the matching change key and make change key's body match the location comment's body
-3. Detect when the cursor is in a change key and if it changes, then change the corresponding location comment
-4. Detect when the cursor is in a change key's body, and change the location comment body to match
-*/
+} //end of test
 class Changer {
     constructor(cm) {
         this.cm = cm
@@ -67,16 +83,29 @@ class Changer {
           let start = i;
           for( ;i < n; i++){
             if(getLine(i).match(/^}/)){
-              return {start,end: i}
+              return this.changeLoc = {start,end: i}
             }
           }
         }
       }
-      return null
+      return this.changeLoc = null
         
     }
+    inChange() {
+      if(this.changeLoc){
+            
+        
+        let line =this.cm.getCursor().line
+        if(line > this.changeLoc.start && line < this.changeLoc.end ){
+          this.cm.Logger.logMessageAtLine(line, "In change")
+        } else {
+          this.cm.Logger.logMessageAtLine(line, "Out change")
+        }
+      }
+    }
     
-    createChange(){
+    replaceChange(changeLoc){
+      
       let body = ["let change = ()=> {"]
       let getLine = (i) => this.cm.getLine(i)
       for(let key in this.locationMap){
@@ -86,10 +115,24 @@ class Changer {
         for(let i = mapping.start; i < mapping.end; i++ ){
           body.push(getLine(i))
         }
-        body.push("    {")
+        body.push("    }")
       }
+      body.push("    //end:")
       body.push("}")
-      return body.join("\n");
+      let newBody = body.join("\n")
+      
+     
+      
+      if(!changeLoc){
+        this.cm.replaceRange(newBody, { line: 2, ch: 0 })
+      } else {
+        let start = { line: changeLoc.start, ch: 0 }
+        let end = {line: changeLoc.end, ch:null}
+        let oldBody = this.cm.getRange(start, end)
+        if(oldBody != newBody)
+            this.cm.replaceRange(newBody, start,end)
+                             
+      }
     }
     //
   	inMap(map){
@@ -128,30 +171,8 @@ class Changer {
       this.changeMap = {}
       this.locationMap = {}
     }
-    scanSource() {
-        this.clearMaps()
-        let n = this.cm.lineCount()
-        let iContinue = this.scanChange(n)
-        this.scanBoth(this.locationMap, n, iContinue)
-      	this.fixChangeMap()
-    }
-    scanChange(n) {
-        for (let i = 0; i < n; i++) {
-            let line = this.cm.getLine(i)
-            if (this.changeStart(line)) {
-                return this.scanBoth(this.changeMap, n, i + 1, "isChange")
-            }
-        }
-        let colon = ':'
-        let changeTemplate =
-`let change = {
-    //purpose${colon}
-    //commit${colon}
-    //end${colon}
-}`
-        //this.cm.replaceRange(changeTemplate, { line: 2, ch: 0 })
-        return 2 + change.Template.split("\n").length
-    }
+    
+    
     fixChangeMap(){
       for(let key in this.changeMap){
         let entry = this.changeMap[key]
@@ -165,8 +186,29 @@ class Changer {
         }
       }
     }
-    //scanBody():  
-    scanBody(i,n = this.cm.lineCount()){
+    
+  scanChange() {
+      let n = this.changeLoc.end
+      let i = this.changeLoc.start
+      for (; i < n; i++) {
+        let startLine = this.cm.getLine(i)
+        if(this.locationComment(startLine)){
+           let start = i
+           i += 2
+           for (; i < n; i++) {
+             let line = this.cm.getLine(i)
+             if(this.locationComment(line)){
+               this.makeChangeEntry(this.changeMap, 
+                              startLine.trim(), start, start + 2, i - 2)
+			   break
+             }
+           }
+        }
+      }
+    }
+  
+  scanBody(i,n = this.cm.lineCount()){
+      let endPattern = /\/\/end[:]?/
       for (; i < n; i++) {
         let startLine = this.cm.getLine(i)
         if(this.locationComment(startLine)){
@@ -177,13 +219,17 @@ class Changer {
            for (; i < n; i++) {
              let line = this.cm.getLine(i)
              let thisIndent = this.lineIndent(line)
-             //console.log("indents", startLine, thisIndent, startIndent)
              if(!line.trim()) continue
              if(this.locationComment(line) || 
+                //endpattern:
+                line.match(endPattern)
+                //end
+                ||
                 thisIndent < startIndent ||
                (thisIndent === startIndent && line.trim() === "}")){
-               console.log(i,line)
-               this.makeChangeEntry(this.locationMap, startLine.trim(), start, i)
+               this.makeChangeEntry(this.locationMap, 
+                            startLine.trim(), start, start + 1, i - 1)
+               console.log(startLine, start,i)
 			   break
              }
            }
@@ -191,37 +237,8 @@ class Changer {
       }
     }
   
-    scanBoth(map, n, start, isChange) {
-        
-        let lastKey = null
-        let lastStart = null
-        let lastIndent = 0
-        for (let i = start; i < n; i++) {
-            let line = this.cm.getLine(i)
-            let nextIndent = this.lineIndent(line)
-            let nextKey = null
-            if (this.locationComment(line)) {
-                this.makeChangeEntry(map, lastKey, lastStart, i - 1)
-                nextKey = line.trim()
-                if (nextKey.match(/\/\/end/)){
-                    return i
-                }
-                lastKey = nextKey
-                lastStart = i
-                lastIndent = nextIndent
-            } else if (lastIndent != null && nextIndent < lastIndent) {
-                this.makeChangeEntry(map, lastKey, lastStart, i - 1)
-                lastKey = null
-                lastStart = null
-                lastIndent = null
-            } else if(isChange && line.trim() && nextIndent === 0){
-            	this.makeChangeEntry(map, lastKey, lastStart, i - 1)
-                return i
-            }
-        }
-        this.makeChangeEntry(map, lastKey, lastStart, n-1)
-    }
-    makeChangeEntry(map, key, keyLoc, end){
+  
+    makeChangeEntry(map, key, keyLoc, start, end){
         //log(typeof map)
         if(!key) return;
         map[key] = {keyLoc, start: keyLoc+1,end}
