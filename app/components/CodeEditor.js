@@ -88,12 +88,12 @@ class CodeEditor extends React.Component {
     oldAdjustSource = true
     saveCode(cm) {
         this.debouncedCompile = debounce((cm) =>
-            this.compileCode(cm), 100);
+            this.compileCode(cm),800);
         this.modChange = debounce((cm) => {
             this.cm.Logger.clearLogs()
             this.debouncedCompile(cm)
             //setTimeout( this.clearError.bind(this), 2000)
-        }, 50, false)
+        }, 300, false)
         if (!this.oldAdjustSource) {
             this.adjustSource = this.simpleAdjustSource
             console.log("restored")
