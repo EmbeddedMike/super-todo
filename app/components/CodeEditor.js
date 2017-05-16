@@ -28,6 +28,7 @@ require('codemirror/addon/hint/javascript-hint')
 require('codemirror/addon/hint/anyword-hint')
 require('../css/gtdflow.css')
 import CMLogger from '../js/cmlogger'
+import Changer from "../js/syncchanges"
 import { setUser } from "../actions/index.js"
 const debounce = require("debounce")
 
@@ -166,8 +167,9 @@ class CodeEditor extends React.Component {
                 let exported = {
                     source, output,
                     SourceMap, GDTEditor: this.props.gdtEditor, CodeEditor,
-                    throttle, debounce, Logger
+                    throttle, debounce, Logger,Changer
                 }
+
 
                 code(exported);
             } catch (e) {
