@@ -3,13 +3,20 @@ let endPattern = /\/\/end[:]?/
 export default class Changer {
     constructor(cm) {
         this.cm = cm
-        let Logger = cm.Logger
-        this.clearLogs = Logger.clearLogs.bind(Logger)
-        this.logMessageAtLine = Logger.logMessageAtLine.bind(Logger)
-        this.setLoggerMapping = Logger.setMapping.bind(Logger)
-        this.clearMaps()
     }
-    
+    syncChanges(){
+    let changeLoc = this.findChange()
+    if (!this.isInChange()) {
+        this.scanBody(changeLoc.end)
+        let changeText = this.makeChangeText();
+        this.replaceChange(changeLoc, changeText)
+    } else {
+        console.log("IN CHANGE")
+        this.scanChange()
+        this.scanBody(this.changeLoc.end)
+        this.replaceCorresponding() 
+    }
+}  
     findChange() {
         let getLine = (i) => this.cm.getLine(i)
         let n = this.cm.lineCount()
@@ -18,7 +25,6 @@ export default class Changer {
             if (getLine(i).match(/^\s*\/\*\s*changes\s*/)) {
                 let start = i;
                 for (i++; i < n; i++) {
-                    console.log(getLine(i))
                     if (getLine(i).match(/^\s*endchanges\s*\*\//)) {
                         return this.changeLoc = { start, end: i }
                     }
@@ -59,7 +65,7 @@ export default class Changer {
                 body.push(getLine(i))
             }
         }
-        body.push("endchanges */")
+        body.push("//end\nendchanges */")
         return body.join("\n")
     }
     replaceChange(changeLoc, newBody) {
@@ -80,34 +86,6 @@ export default class Changer {
             }
         }
     }
-    blueLine(line) {
-        this.cm.Logger.addBGClass(line, "lightBlue");
-    }
-    unBlueAll(line) {
-        this.cm.Logger.removeBGClassAll("lightBlue");
-    }
-    showMaps() {
-        this.clearLogs()
-        this.unBlueAll()
-        this.showMap(this.changeMap)
-        this.showMap(this.bodyMap)
-    }
-    showMap(map) {
-        for (let key in map) {
-            let value = map[key]
-
-            for (let i = value.start; i <= value.end; i++) {
-                this.logMessageAtLine(i, key)
-
-            }
-        }
-    }
-    clearMaps() {
-        this.changeMap = {}
-        this.bodyMap = {}
-    }
-
-
     fixChangeMap() {
         for (let key in this.changeMap) {
             let entry = this.changeMap[key]
@@ -131,8 +109,7 @@ export default class Changer {
             let startIndent = this.lineIndent(startLine)
             if (this.locationComment(startLine)) {
                 let start = i
-                i += 1
-                for (; i <= n; i++) {
+                for (i++; i <= n; i++) {
                     let line = this.cm.getLine(i)
                     let thisIndent = this.lineIndent(line)
                     //console.log(line)
@@ -144,6 +121,7 @@ export default class Changer {
                         thisIndent < startIndent){
                         this.makeChangeEntry(this.changeMap,
                             startLine.trim(), start, start + 1 , i - 1)
+                        i--
                         break
                     }
                 }
@@ -164,10 +142,11 @@ export default class Changer {
                 for (; i < n; i++) {
                     let line = this.cm.getLine(i)
                     let thisIndent = this.lineIndent(line)
-                    if (!line.trim()) continue
+                    if (startIndent > 0 && !line.trim()) continue
                     if (this.locationComment(line) ||
                         line.match(endPattern)
                         ||
+                        (startIndent === 0 && !line.trim()) ||
                         thisIndent < startIndent ||
                         (thisIndent === startIndent && line.trim().match(/^}/))) {
                         let end = i - 1;
@@ -221,102 +200,21 @@ export default class Changer {
                 mappings[j] = i;
             }
         }
-        this.setLoggerMapping(mappings)
+        if( this.cm.Logger) this.cm.Logger.setLoggerMapping(mappings)
     }
-
-}
-
-/*
-//console.clear()
-let L = this.cm.Logger;
-let thisCM = this.cm
-let Changer = exported.Changer
-
-let c = new Changer(this.cm)
-let change = () => {
-  //onchange:
-  { 
-    let onChange = (cm) => {
-        //these are tests!!! !!
-        bothFunction(cm)
-    }
-  }
-  //end 
-}
-
-let bothFunction = (cm) => {
-    let changeLoc = c.findChange()
-    if (false && !c.isInChange()) {
-        if (!changeLoc) changeLoc = { start: 2, end: 2 }
-        console.log("changeloc", changeLoc)
-        c.scanBody(changeLoc.end)
-        if (changeLoc) {
-            console.log("bodyMapping", c.bodyMap);
-            let changeText = c.makeChangeText();
-            console.log(changeText)
-            c.replaceChange(changeLoc, changeText)
-        } 
-    } else {
-        c.findChange() 
-        console.log(c.changeLoc) 
-        c.scanChange()
-        console.log("CHANGEMAP", c.changeMap) 
-        c.scanBody(c.changeLoc.end)
-        c.replaceCorresponding() 
-    } 
-  
-}  
-//onchange:
-    let onChange = (cm) => {
-        //these are tests
-        bothFunction(cm)
-    }
-  
-   //more 
-//end 
-let onCursor = (cm) => {
-
-}
-
-let debounce = exported.debounce
-onChange = debounce(onChange, 100);
-onCursor = debounce(onCursor, 100);
-let recall = (event, cb) => {
-    let cm = this.cm
-    let uncall = () => {
-        console.log(event + " off")
-        cm.off(event, cb)
-    }
-    setTimeout(uncall, 10000)
-    cm.on(event, cb)
-}
-
-recall("cursorActivity", onCursor);
-recall("change", onChange);
-
-
-let patch = { 
     replaceCorresponding(){
-      console.log("REPLACE", this.changeMap);
       for(let key in this.changeMap) {
-        console.log("KEY", key);
         let change = this.changeMap[key]
         let body = this.bodyMap[key]
         let n = change.end - change.start + 1
-        let newStuff = this.cm.getRange({line:change.start + 1, ch:0}, 
-                                        {line:change.end - 1, ch:null});
+        let newStuff = this.cm.getRange({line:change.start, ch:0}, 
+                                        {line:change.end, ch:null});
         let oldStuff = this.cm.getRange({line:body.start, ch:0}, 
                                         {line:body.end, ch:null})
-        console.log(change,body)
-        console.log("OLD",oldStuff)
-        console.log("NEW", newStuff) 
+        this.cm.replaceRange(newStuff, {line:body.start, ch:0}, 
+                                        {line:body.end, ch:null})
         
       }
     }
+
 }
-c.replaceCorresponding = patch.replaceCorresponding.bind(c);
-
-
-
- 
-*/

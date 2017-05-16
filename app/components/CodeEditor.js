@@ -88,10 +88,14 @@ class CodeEditor extends React.Component {
     }
     oldAdjustSource = true
     saveCode(cm) {
+        console.log("this")
+        try{
+        this.changer = new Changer(cm)
         this.debouncedCompile = debounce((cm) =>
             this.compileCode(cm),800);
         this.modChange = debounce((cm) => {
             this.cm.Logger.clearLogs()
+            this.changer.syncChanges(cm)
             this.debouncedCompile(cm)
             //setTimeout( this.clearError.bind(this), 2000)
         }, 300, false)
@@ -103,6 +107,9 @@ class CodeEditor extends React.Component {
         }
         this.oldAdjustSource = !this.oldAdjustSource
         this.compileCode(cm)
+        }catch(e){
+            console.log(e)
+        }
     }
 
     compileCode(cm) {
@@ -205,7 +212,7 @@ class CodeEditor extends React.Component {
         this.addCB("cursorActivity", debounce(this.cursorActivity, 50, true))
         this.cm.removeKeyMap("GTD");
         this.addCB("gutterClick", this.gutterClick)
-        this.saveCode()
+        this.saveCode(this.cm)
         this.cm.addKeyMap({
             name: "GTD",
             "Ctrl-F": "findPersistent",
