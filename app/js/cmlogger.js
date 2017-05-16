@@ -1,8 +1,10 @@
 let debounce = require("debounce")
 let SourceMap = require("source-map")
+let lastMapping = []
 export default class CMLogger {
     //class CMLogger {
     constructor(cm, map) {
+        console.log("NEW LOGGER")
         this.cm = cm
         this.logLines = []
         this.smcs = []
@@ -12,11 +14,11 @@ export default class CMLogger {
         this.log = this.log.bind(this)
         this.displayError = this.displayError.bind(this)
         this.showData = debounce(this.showData.bind(this), 100)
-        this.mapping = []
+        this.mapping = lastMapping
     }
     setMapping(mapping){
-        console.log("Mapping set in " + this.cmLogger)
         this.mapping = mapping
+        lastMapping = mapping
     }
     addBGClass(line,className){
         this.cm.addLineClass(line - 1, "background", className)
@@ -114,9 +116,10 @@ export default class CMLogger {
     log(output) {
         // console.log(this.mapping)
         let line = this.getCallerLine(1);
-        //console.log(line, output)
+        console.log(line, output)
         let logLine = line - 2
         this.logDataAt(logLine , output)
+        console.log(this.mapping)
         let altLine = this.mapping[logLine];
         if(altLine){
             this.logDataAt(altLine , output)

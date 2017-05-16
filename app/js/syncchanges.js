@@ -4,19 +4,20 @@ export default class Changer {
     constructor(cm) {
         this.cm = cm
     }
-    syncChanges(){
-    let changeLoc = this.findChange()
-    if (!this.isInChange()) {
-        this.scanBody(changeLoc.end)
-        let changeText = this.makeChangeText();
-        this.replaceChange(changeLoc, changeText)
-    } else {
-        console.log("IN CHANGE")
-        this.scanChange()
-        this.scanBody(this.changeLoc.end)
-        this.replaceCorresponding() 
+    syncChanges() {
+        let changeLoc = this.findChange()
+        if (!this.isInChange()) {
+            this.scanBody(changeLoc.end)
+            let changeText = this.makeChangeText();
+            this.replaceChange(changeLoc, changeText)
+            this.scanChange()
+        } else {
+            this.scanChange()
+            this.scanBody(this.changeLoc.end)
+            this.replaceCorresponding()
+        }
+        this.setMappings()
     }
-}  
     findChange() {
         let getLine = (i) => this.cm.getLine(i)
         let n = this.cm.lineCount()
@@ -31,7 +32,7 @@ export default class Changer {
                 }
             }
         }
-        this.cm.replaceRange("/* changes\n\nendchanges */\n",{line:2,ch:0})
+        this.cm.replaceRange("/* changes\n\nendchanges */\n", { line: 2, ch: 0 })
         return this.findChange()
     }
     isChangeVisible() {
@@ -44,7 +45,7 @@ export default class Changer {
         let changeTo = changeLoc.end
         let inView = (line) => line > viewFrom && line < viewTo
         let inChange = (line) => line > changeFrom && line < changeTo
-        console.log(viewFrom, viewTo, changeFrom, changeTo)
+        //console.log(viewFrom, viewTo, changeFrom, changeTo)
         return inView(changeFrom) || inView(changeTo) || inChange(viewFrom) || inChange(viewTo)
     }
     isInChange() {
@@ -118,21 +119,21 @@ export default class Changer {
                         ||
                         (thisIndent === startIndent && line.trim() === "}")
                         ||
-                        thisIndent < startIndent){
+                        thisIndent < startIndent) {
                         this.makeChangeEntry(this.changeMap,
-                            startLine.trim(), start, start + 1 , i - 1)
+                            startLine.trim(), start, start + 1, i - 1)
                         i--
                         break
                     }
                 }
             }
         }
-       
+
     }
 
-    scanBody(i=this.changeLoc.end, n = this.cm.lineCount()) {
+    scanBody(i = this.changeLoc.end, n = this.cm.lineCount()) {
         this.bodyMap = {}
-        
+
         for (; i < n; i++) {
             let startLine = this.cm.getLine(i)
             if (this.locationComment(startLine)) {
@@ -150,11 +151,11 @@ export default class Changer {
                         thisIndent < startIndent ||
                         (thisIndent === startIndent && line.trim().match(/^}/))) {
                         let end = i - 1;
-                        if((thisIndent === startIndent && line.trim().match(/^}/))) end++ 
-                        while(!this.cm.getLine(end).trim()) end--
+                        if ((thisIndent === startIndent && line.trim().match(/^}/))) end++
+                        while (!this.cm.getLine(end).trim()) end--
                         this.makeChangeEntry(this.bodyMap,
                             startLine.trim(), start, start + 1, end)
-                        
+
                         i--
                         break
                     }
@@ -188,33 +189,36 @@ export default class Changer {
     }
 
     setMappings() {
-        let map1 = this.changeMap
-        let map2 = this.bodyMap
+        let changeMap = this.changeMap
+        let bodyMap = this.bodyMap
         let mappings = []
-        for (let key in map1) {
-            let val1 = map1[key]
-            let val2 = map2[key]
+        for (let key in changeMap) {
+            let change = changeMap[key]
+            let body = bodyMap[key]
+            //console.log(key, change)
             let i, j
-            for (i = val1.start, j = val2.start; i < val1.end; i++ , j++) {
+            for (i = change.start, j = body.start; i <= change.end; i++ , j++) {
                 mappings[i] = j;
                 mappings[j] = i;
             }
         }
-        if( this.cm.Logger) this.cm.Logger.setLoggerMapping(mappings)
+        //console.log(this.cm.Logger, mappings)
+        if (this.cm.Logger) this.cm.Logger.setMapping(mappings)
     }
-    replaceCorresponding(){
-      for(let key in this.changeMap) {
-        let change = this.changeMap[key]
-        let body = this.bodyMap[key]
-        let n = change.end - change.start + 1
-        let newStuff = this.cm.getRange({line:change.start, ch:0}, 
-                                        {line:change.end, ch:null});
-        let oldStuff = this.cm.getRange({line:body.start, ch:0}, 
-                                        {line:body.end, ch:null})
-        this.cm.replaceRange(newStuff, {line:body.start, ch:0}, 
-                                        {line:body.end, ch:null})
-        
-      }
+    replaceCorresponding() {
+        for (let key in this.changeMap) {
+            let change = this.changeMap[key]
+            let body = this.bodyMap[key]
+            let n = change.end - change.start + 1
+            let newStuff = this.cm.getRange({ line: change.start, ch: 0 },
+                { line: change.end, ch: null });
+            let oldStuff = this.cm.getRange({ line: body.start, ch: 0 },
+                { line: body.end, ch: null })
+            if (oldStuff != newStuff) {
+                this.cm.replaceRange(newStuff, { line: body.start, ch: 0 },
+                    { line: body.end, ch: null })
+            }
+        }
     }
 
 }

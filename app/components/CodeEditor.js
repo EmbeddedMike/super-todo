@@ -27,6 +27,13 @@ require('codemirror/addon/hint/show-hint')
 require('codemirror/addon/hint/javascript-hint')
 require('codemirror/addon/hint/anyword-hint')
 require('../css/gtdflow.css')
+BaseCodeMirror.defineMode("changemode", function(config){ 
+    return BaseCodeMirror.multiplexingMode(
+        BaseCodeMirror.getMode(config, "text/javascript"),
+        {open: "/* changes", close: "endchanges */",
+        mode: BaseCodeMirror.getMode(config, "text/javascript"),
+        delimStyle: "comment"})
+})
 import CMLogger from '../js/cmlogger'
 import Changer from "../js/syncchanges"
 import { setUser } from "../actions/index.js"
@@ -222,6 +229,7 @@ class CodeEditor extends React.Component {
     render() {
         var options = {
             lineNumbers: true,
+            mode: "changemode",
             keyMap: "sublime",
             extraKeys: {
                 "Ctrl-Q": function (cm) {
