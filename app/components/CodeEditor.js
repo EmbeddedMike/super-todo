@@ -9,6 +9,8 @@ require('codemirror/addon/search/search')
 let SourceMap = require("source-map")
 require('codemirror/keymap/sublime')
 import throttle from 'lodash/throttle';
+import { render } from 'react-dom'
+import glamorous from "glamorous"
 require('codemirror/addon/scroll/annotatescrollbar');
 require('codemirror/addon/search/matchesonscrollbar');
 require('codemirror/addon/search/matchesonscrollbar.css');
@@ -87,13 +89,8 @@ class CodeEditor extends React.Component {
     actuallyMoved(cm) {
         //console.log("actually moved")
     }
-    adjustSource(source) {
-        return source
-    }
-    simpleAdjustSource(source) {
-        return source
-    }
-    oldAdjustSource = true
+    
+    
     saveCode(cm) {
         console.log("this")
         try{
@@ -106,13 +103,7 @@ class CodeEditor extends React.Component {
             this.debouncedCompile(cm)
             //setTimeout( this.clearError.bind(this), 2000)
         }, 300, false)
-        if (!this.oldAdjustSource) {
-            this.adjustSource = this.simpleAdjustSource
-            console.log("restored")
-            this.oldAdjustSource = !this.oldAdjustSource
-            return;
-        }
-        this.oldAdjustSource = !this.oldAdjustSource
+        
         this.compileCode(cm)
         }catch(e){
             console.log(e)
@@ -140,7 +131,6 @@ class CodeEditor extends React.Component {
         [i, sTop] = aSplit(0, n)
         let offset = i + 1
         let result = [i, sBottom] = aSplit(offset, n)
-//        source = this.adjustSource(source)
         this.compileAndRun(sTop, 0, true)
         this.compileAndRun(sBottom,0, false)
     }
@@ -181,7 +171,7 @@ class CodeEditor extends React.Component {
                 let exported = {
                     source, output,
                     SourceMap, GDTEditor: this.props.gdtEditor, CodeEditor,
-                    throttle, debounce, Logger,Changer
+                    throttle, debounce, Logger,Changer, render,glamorous
                 }
 
 
