@@ -1,6 +1,8 @@
+import { render } from 'react-dom'
 let debounce = require("debounce")
 let SourceMap = require("source-map")
 let lastMapping = []
+
 export default class CMLogger {
     //class CMLogger {
     constructor(cm, map) {
@@ -63,7 +65,13 @@ export default class CMLogger {
         node.className = className;
         this.cm.addWidget(pos, node)
     }
-    
+    renderAtPos(pos, elements, className){
+        let node = document.createElement("div")
+        render(elements, node )
+        node = node.children[0]
+        node.className = node.className + " " + className;
+        this.cm.addWidget(pos, node)
+    }
     showData() {
         let values = this.logLines;
         let n = values.length;
@@ -113,13 +121,16 @@ export default class CMLogger {
             return this.getPosition({ line, column })
         }
     }
-    log(output) {
+    log(output, depth = 1){
         // console.log(this.mapping)
-        let line = this.getCallerLine(1);
-        console.log(line, output)
+        let line = this.getCallerLine(depth);
+        //console.log(line, output)
         let logLine = line - 2
+        if(typeof output === "function"){
+            output = "function"
+        }
         this.logDataAt(logLine , output)
-        console.log(this.mapping)
+        //console.log(this.mapping)
         let altLine = this.mapping[logLine];
         if(altLine){
             this.logDataAt(altLine , output)
