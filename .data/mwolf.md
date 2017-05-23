@@ -17,14 +17,14 @@ Parse MarkDown links and render/undrender them
 Example with a #er??
 //some stuff
 # configstart
-console.log("YAY");
+console.log("YAY")
 
 _this.deleteNode  = (node) => {
   
 }
 
 _this.deleteLogs = () => {
-  let logs = document.getElementsByClassName("logdata");
+  let logs = document.getElementsByClassName("logdata")
   let list = []
   let log;
   for(log of logs){
@@ -83,11 +83,11 @@ _this.testFunction = (param) => {
 BaseCodeMirror.defineSimpleMode("GTDFlow", {
   // The start state contains the rules that are intially used
   start: [
-     {regex: /\s*#.*$/, token: "header", sol: true},
+     {regex: /\s*#.*$/, token: "header", sol: true},#?
      {regex: /\/\*/, token: "comment", next: "comment"},
      {regex: /\/\/.*/, token: "comment"},
      {regex: /([\w\s])+/, token: "normal"},
-     {regex: /([#@]\w+\?)/, token: "error"},
+     {regex: /([#@]\w+\?)/, token: "error"},#? @?
      {regex: /(@\w+)/, token: "context"},
      {regex: /(#\w+)/, token: "category"},
      {regex: /(\[.*\])/, token: "markdownlink", next: "linktarget"},
