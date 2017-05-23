@@ -163,6 +163,39 @@ export default class Changer {
             }
         }
     }
+    scanMethods(i = this.changeLoc.end, n = this.cm.lineCount()) {
+        let methodBody = []
+        let methodName
+        let patchName
+        for (; i < n; i++) {
+            let matcher;
+            if(matcher = this.cm.getLine(i).match(/class\s*(\S*)/)) {
+                methodName = matcher[1]
+                patchName = `${methodName}_patch`
+                methodBody.push(`${patchName}{\n`)
+                break
+            }
+        }
+        for (; i < n; i++) {
+            let startLine = this.cm.getLine(i)
+            if (this.methodComment(startLine)) {
+                let startIndent = this.lineIndent(startLine)
+                for (i++; i < n; i++) {
+                    let line = this.cm.getLine(i)
+                    methodBody.push(line)
+                    let thisIndent = this.lineIndent(line)
+                    if(thisIndent === startIndent && line.trim().match(/^}/)) {
+                        break
+                    } else {
+
+                    }
+                }
+            }
+        }
+        methodBody.push("}")
+        methodBody.push(`for(key in ${patchName} ${className}[key] = ${patchName}[key].bind(${className})`)
+        return methodBody.join("\n")
+    }
 
 
     makeChangeEntry(map, key, keyLoc, start, end) {
@@ -220,5 +253,90 @@ export default class Changer {
             }
         }
     }
+     scanMethods(text) {
+    let methodComment = (line) => {
+        let matcher = line.match(/^\s*\/\/(.*):\s*$/)
+        if (matcher) return matcher[1]
+        return null
+    }
+        let methodBody = []
+        let className
+        let patchName
+        let aLines = text.split("\n")
+        let n = aLines.length
+        let i = 0
+        for (; i < n; i++) {
+            let matcher;
+            if(matcher = aLines[i].match(/class\s*(\S*)/)) {
+                className = matcher[1]
+                patchName = `${className}_patch`
+                methodBody.push(`let ${patchName} = {\n`)
+                break
+            }
+        }
+        for (; i < n; i++) {
+            let startLine = aLines[i]
+            if (methodComment(startLine)) {
+                let startIndent = this.lineIndent(startLine)
+                for (i++; i < n; i++) {
+                    let line = aLines[i]
+                    methodBody.push(line)
+                    let thisIndent = this.lineIndent(line)
+                    if(thisIndent === startIndent && line.trim().match(/^}/)) {
+                        break
+                    } else {
+
+                    }
+                }
+              methodBody.push(",")
+            }
+        }
+        methodBody.push("}")
+        methodBody.push(`for(let key in ${patchName}) this.${className.toLowerCase()}[key] = ${patchName}[key].bind(this.${className.toLowerCase()})`)
+        return methodBody.join("\n")
+    }
 
 }
+/*
+Example:
+let log = this.cm.Logger.log
+
+
+//this change:
+let a = 100
+a = a + 100
+a += 200
+
+//another changer:
+let c = 1000
+c += 200
+c += 200
+c += 200
+log("e")
+
+
+
+let more = "changes"
+more += 100
+c += 200
+c += 200
+c += 200
+
+*/
+/*
+
+
+let changer_patch = {
+
+  method(){
+    let a = 1
+  }
+,
+  method2 (){
+     let b = 2
+  }
+,
+}
+for(let key in changer_patch) this.changer[key] = changer_patch[key].bind(this.changer)
+
+*/
