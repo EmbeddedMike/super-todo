@@ -8,12 +8,15 @@ require('codemirror/addon/search/searchcursor')
 require('codemirror/addon/search/search')
 let SourceMap = require("source-map")
 require('codemirror/keymap/sublime')
+
 import throttle from 'lodash/throttle';
 import { render } from 'react-dom'
 import glamorous from "glamorous"
+var Slider = require('nw-react-slider')
 require('codemirror/addon/scroll/annotatescrollbar');
 require('codemirror/addon/search/matchesonscrollbar');
 require('codemirror/addon/search/matchesonscrollbar.css');
+require('nw-react-slider/dist/nw-react-slider.css')
 require('codemirror/lib/codemirror.css');
 require('codemirror/addon/mode/simple');
 require('codemirror/mode/javascript/javascript');
@@ -216,6 +219,9 @@ class CodeEditor extends React.Component {
             "Ctrl-S": this.saveCode.bind(this)
         })
     }
+    sliderChange(value){
+        console.log(value)
+    }
     render() {
         var options = {
             lineNumbers: true,
@@ -236,6 +242,12 @@ class CodeEditor extends React.Component {
         };
 
         return (<div className="codeEditor">
+            <Slider value={0}
+                    min={0}
+                    max={10}
+                     ticks
+                     markers={[{value: 3, label: 'Three'}, {value: 8, label: 'Eight'}]}
+                    onChange={this.sliderChange}/>
             <CodeMirror
                 ref={(entry) => { this.initialize(entry) }}
                 onChange={this.onChange.bind(this)}
