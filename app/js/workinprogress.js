@@ -1,3 +1,6 @@
+/* changes
+//end
+endchanges */
 console.clear()
 
 
@@ -176,9 +179,15 @@ this.gutterClick1 = (cm, line, gutter, event) =>{
   this.renderOne(cm, line, breakLines[line])
 }
 this.renderBreakSymbol = (cm,line,className) => {
+  this.renderGutterSymbol(cm,line,"breakpoint-gutter", className)
+}
+this.renderArrowSymbol = (cm,line) => {
+  this.renderGutterSymbol(cm,line,"arrow-gutter", "arrow")
+}
+this.renderGutterSymbol = (cm,line,gutter, className) => {
   let element = document.createElement("div")
   element.setAttribute("class", className)
-  cm.getDoc().setGutterMarker(line, "breakpoint-gutter", element)
+  cm.getDoc().setGutterMarker(line, gutter, element)
 }
 this.renderOne = (cm, line, which ) => {
     switch(which){
@@ -221,9 +230,9 @@ let output = Babel.transform( source,
           this.renderBreakDots(this.cm)
           eval(output.code)
           //console.log(visitedLines)
-          let sliderProps = this.sliderProps
-          sliderProps.value = 0;
+          let sliderProps = this.codeSlider.sliderProps
           sliderProps.max = visitedSequence.length
+          this.codeSlider.sliderChange(0)
           console.log(sliderProps)
         }catch(e){
           console.log("RUNTIME ERROR", e)
@@ -232,6 +241,17 @@ let output = Babel.transform( source,
 } catch(e){
   console.log("TRANSFORM ERROR", e);
 }
+this.sliderWasChanged = (value) =>{
+    this.cm.clearGutter("arrow-gutter")
+  this.renderArrowSymbol(this.cm, 240 + value)
+
+}
+console.log(this.sliderWasChanged)
+let props = this.codeSlider.sliderProps
+props.max = 100
+//this.codeSlider.sliderChange(80)
+console.log(props)
+
 
 
 /*

@@ -60,9 +60,11 @@ class CodeSlider extends React.Component {
     sliderChange(value) {
         this.sliderProps.value = value
         //this.sliderUpdate(value)
-        
-        if(this.props.sliderWasChanged)
-            this.props.sliderWasChanged(value)
+        if(this.props.parentComponent.sliderWasChanged){
+            this.props.parentComponent.sliderWasChanged(value)
+        }
+        // if(this.props.sliderWasChanged)
+        //     this.props.sliderWasChanged(value)
         this.forceUpdate()
         // this.sliderProps.value = value
     }
@@ -283,7 +285,9 @@ class CodeEditor extends React.Component {
                 "breakpoint-gutter"]
         };
         return (<div className="codeEditor">
-            <CodeSlider sliderWasChanged={this.sliderWasChanged}
+            <CodeSlider 
+            sliderWasChanged={this.sliderWasChanged}
+             parentComponent={this}
              ref={(entry) => { this.codeSliderRef(entry) }}/>
             <CodeMirror
                 ref={(entry) => { this.initialize(entry) }}
