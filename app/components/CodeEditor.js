@@ -32,20 +32,57 @@ require('codemirror/addon/hint/show-hint')
 require('codemirror/addon/hint/javascript-hint')
 require('codemirror/addon/hint/anyword-hint')
 require('../css/gtdflow.css')
-BaseCodeMirror.defineMode("changemode", function(config){ 
+BaseCodeMirror.defineMode("changemode", function (config) {
     return BaseCodeMirror.multiplexingMode(
         BaseCodeMirror.getMode(config, "text/javascript"),
-        {open: "/* changes", close: "endchanges */",
-        mode: BaseCodeMirror.getMode(config, "text/javascript"),
-        delimStyle: "comment"})
+        {
+            open: "/* changes", close: "endchanges */",
+            mode: BaseCodeMirror.getMode(config, "text/javascript"),
+            delimStyle: "comment"
+        })
 })
 import CMLogger from '../js/cmlogger'
 import Changer from "../js/syncchanges"
 import { setUser } from "../actions/index.js"
 const debounce = require("debounce")
 
-window.onbeforeunload = function() {
-  return "Are you sure you want to navigate away?";
+window.onbeforeunload = function () {
+    return "Are you sure you want to navigate away?";
+}
+class CodeSlider extends React.Component {
+    constructor(props) {
+        super(props);
+        this.sliderProps = { value: 5, min: 0, max: 10, markers: [{ value: 3, label: 'Three' }, { value: 8, label: 'Eight' }] }
+    }
+    sliderUpdate(value) {
+        console.log(value)
+    }
+    sliderChange(value) {
+        this.sliderProps.value = value
+        //this.sliderUpdate(value)
+        
+        if(this.props.sliderWasChanged)
+            this.props.sliderWasChanged(value)
+        this.forceUpdate()
+        // this.sliderProps.value = value
+    }
+    setSliderProps(props) {
+        this.sliderProps = props
+    }
+    getSliderProps(props) {
+        return this.sliderProps
+    }
+    render() {
+        return (<Slider
+            value={this.sliderProps.value}
+            min={this.sliderProps.min}
+            max={this.sliderProps.max}
+            ticks
+            markers={this.sliderProps.markers}
+            onChange={this.sliderChange.bind(this)}
+        />)
+    }
+
 }
 class CodeEditor extends React.Component {
     //F: initialize
@@ -53,7 +90,7 @@ class CodeEditor extends React.Component {
         super(props);
         this.state = { code: "//Test" }
         this.callbacks = []
-
+        this.sliderProps = { value: 5, min: 0, max: 10, markers: [{ value: 3, label: 'Three' }, { value: 8, label: 'Eight' }] }
     }
     addCB(event, cb) {
         let boundCB = cb.bind(this)
@@ -92,23 +129,23 @@ class CodeEditor extends React.Component {
     actuallyMoved(cm) {
         //console.log("actually moved")
     }
-    
-    
+
+
     saveCode(cm) {
         console.log("this")
-        try{
-        this.changer = new Changer(cm)
-        this.debouncedCompile = debounce((cm) =>
-            this.compileCode(cm),800);
-        this.modChange = debounce((cm) => {
-            this.cm.Logger.clearLogs()
-            this.changer.syncChanges(cm)
-            this.debouncedCompile(cm)
-            //setTimeout( this.clearError.bind(this), 2000)
-        }, 300, false)
-        
-        this.compileCode(cm)
-        }catch(e){
+        try {
+            this.changer = new Changer(cm)
+            this.debouncedCompile = debounce((cm) =>
+                this.compileCode(cm), 800);
+            this.modChange = debounce((cm) => {
+                this.cm.Logger.clearLogs()
+                this.changer.syncChanges(cm)
+                this.debouncedCompile(cm)
+                //setTimeout( this.clearError.bind(this), 2000)
+            }, 300, false)
+
+            this.compileCode(cm)
+        } catch (e) {
             console.log(e)
         }
     }
@@ -135,9 +172,9 @@ class CodeEditor extends React.Component {
         let offset = i + 1
         let result = [i, sBottom] = aSplit(offset, n)
         this.compileAndRun(sTop, 0, true)
-        this.compileAndRun(sBottom,0, false)
+        this.compileAndRun(sBottom, 0, false)
     }
-    compileAndRun(source,offset,initial){
+    compileAndRun(source, offset, initial) {
         source = "(exported) => {\n" + source + "}"
         try {
             // let func = "(param)=> {" + source + "}"
@@ -164,17 +201,17 @@ class CodeEditor extends React.Component {
                 console.log("EVALING")
                 let code = eval(output.code).bind(this);
                 let Logger
-                if(initial){
+                if (initial) {
                     Logger = new CMLogger(this.cm, output.map);
-                } 
+                }
                 else {
                     Logger = this.cm.Logger
-                    this.cm.Logger.addSourceMap(output.map,offset)
+                    this.cm.Logger.addSourceMap(output.map, offset)
                 }
                 let exported = {
                     source, output,
                     SourceMap, GDTEditor: this.props.gdtEditor, CodeEditor,
-                    throttle, debounce, Logger,Changer, render,glamorous
+                    throttle, debounce, Logger, Changer, render, glamorous
                 }
 
 
@@ -193,8 +230,8 @@ class CodeEditor extends React.Component {
     showRuntimeError(e) {
         this.cm.Logger.displayError(e)
     }
-    gutterClick(cm, line, gutter, event){
-        this.gutterClick1(cm, line, gutter, event )
+    gutterClick(cm, line, gutter, event) {
+        this.gutterClick1(cm, line, gutter, event)
     }
     initialize(cm) {
         if (!this.lastLine) this.lastLine = 0;
@@ -219,9 +256,14 @@ class CodeEditor extends React.Component {
             "Ctrl-S": this.saveCode.bind(this)
         })
     }
-    sliderChange(value){
-        console.log(value)
+
+    codeSliderRef(ref) {
+        this.codeSlider = ref
     }
+    sliderWasChanged(val){
+        console.log("SLIDER CHANGED TO ", val)
+    }
+    
     render() {
         var options = {
             lineNumbers: true,
@@ -232,22 +274,17 @@ class CodeEditor extends React.Component {
                     cm.foldCode(cm.getCursor());
                 },
                 "Ctrl-Space": "autocomplete",
-                'Tab': 'insertSoftTab' 
+                'Tab': 'insertSoftTab'
             },
             foldGutter: { rangeFinder: BaseCodeMirror.fold.indent },
             gutters: ["CodeMirror-linenumbers",
-            "CodeMirror-foldgutter",
-            "arrow-gutter",
-            "breakpoint-gutter"]
+                "CodeMirror-foldgutter",
+                "arrow-gutter",
+                "breakpoint-gutter"]
         };
-
         return (<div className="codeEditor">
-            <Slider value={0}
-                    min={0}
-                    max={10}
-                     ticks
-                     markers={[{value: 3, label: 'Three'}, {value: 8, label: 'Eight'}]}
-                    onChange={this.sliderChange}/>
+            <CodeSlider sliderWasChanged={this.sliderWasChanged}
+             ref={(entry) => { this.codeSliderRef(entry) }}/>
             <CodeMirror
                 ref={(entry) => { this.initialize(entry) }}
                 onChange={this.onChange.bind(this)}

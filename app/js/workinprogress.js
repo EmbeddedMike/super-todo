@@ -1,8 +1,7 @@
 console.clear()
-let log = this.cm.Logger.log
-let zlog = (output) => {
-  this.cm.Logger.log(output,2)
-}
+
+
+
 
 //these two lines go together. Base tells where to offset the source maps
 let base = this.cm.Logger.getCallerLine(0)
@@ -13,6 +12,9 @@ let myFunction = () =>{
  let another = 10
 }
 myFunction()
+
+
+
 let adder = 1
 for( let i = 0; i < 3; i++ ){
   console.log("adder")
@@ -58,6 +60,13 @@ let breakLines = []      //Lines with breakpoints
 let visitedLines = []    //Count execution of lines visited during execution 
 let locationList = []    //List of node 'loc' entries
 let visitedSequence = [] //Sequence of locations visited
+let assignedSequence = [] //sequence of value assignments
+let log = this.cm.Logger.log
+let zlog = (value, lhs) => {
+  this.cm.Logger.log(value,2)
+  assignedSequence.push({lhs, value, at:visitedSequence.length})
+}
+
 this.visited = (index) => { 
   //called when a statement is visited
   //console.log(loc)
@@ -189,7 +198,7 @@ this.renderBreakDots = (cm) =>
 {
   let n = breakLines.length
   for( let i = 0; i < n; i++ ) {
-    this.renderOne(cm, i, breakLines[i])
+    this.renderOne(cm, i + base - 2, breakLines[i])
   }
 }
 try {
@@ -207,11 +216,15 @@ let output = Babel.transform( source,
 		//console.log(breakLines)
 		console.log(output.code)
   		try{
+          console.log("BASE IS", base)
           this.cm.Logger.addSourceMap(output.map, base)
           this.renderBreakDots(this.cm)
           eval(output.code)
           //console.log(visitedLines)
-
+          let sliderProps = this.sliderProps
+          sliderProps.value = 0;
+          sliderProps.max = visitedSequence.length
+          console.log(sliderProps)
         }catch(e){
           console.log("RUNTIME ERROR", e)
         }
