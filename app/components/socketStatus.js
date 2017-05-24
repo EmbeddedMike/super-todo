@@ -100,7 +100,6 @@ class SocketStatus extends Component {
   componentWillMount() {
     // console.log("mount");
     setupCB = setupCB.bind(this);
-    window.addEventListener("beforeunload", () => window.myBeforeUnload())
 
     // sock.send("opening");
   }
