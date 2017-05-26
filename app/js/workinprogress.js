@@ -1,61 +1,43 @@
+console.clear()
+
 /* changes
 //end
 endchanges */
-console.clear()
-
-
-
 
 //these two lines go together. Base tells where to offset the source maps
 let base = this.cm.Logger.getCallerLine(0)
 let source = `
-let a = 10
-log("a test")
-let myFunction = () =>{
- let another = 10
-}
-myFunction()
-
-
 
 let adder = 1
 for( let i = 0; i < 3; i++ ){
   console.log("adder")
-  let c = "10"
+  let c = "10" 
+  for(let j = 0; j < 10; j++) {
+    adder = adder + j
+    adder = adder + j
+  }
   adder = adder + 1
   adder = adder + 1
 }
 
 `
-let rest = `
- 
-let qqq = 1
+/* changes//console.log(source)
 
-let q,r,s,t = 10
-let b = "this thing"
-
-log('this is a test')
-
-
-let a
-
-a = "statement" + 
-  "some more"
-let d = "this thing"
-
-a = a + "foo" 
-/*
-*/
-`
-/* changes
 //end
 endchanges */
+
+let diags ={
+  showCode:false,
+  showCompiled:true,
+  showInstrumentation:false,
+  showAttemptToAdd: false
+  }
 let Span = exported.glamorous.Span
 let CodeSlider = () => <Span  fontSize={20} zIndex="2" backgroundColor="red"
       textAlign="center">Hello world</Span>
 let DisplayString = (string) => 1
 this.cm.Logger.renderAtPos({line: 42, ch:2}, <CodeSlider/>, "helloClass")
-let clear = () => {console.log("clear"); this.cm.Logger.clearByClass("helloClass")}
+let clear = () => { this.cm.Logger.clearByClass("helloClass")}
 setTimeout(clear.bind(this), 3000) 
 
 
@@ -64,15 +46,25 @@ let visitedLines = []    //Count execution of lines visited during execution
 let locationList = []    //List of node 'loc' entries
 let visitedSequence = [] //Sequence of locations visited
 let assignedSequence = [] //sequence of value assignments
+let forRanges = []
+
+this.enterFor= (info) =>{
+}
+this.exitFor =  () => {
+  forRanges.pop()
+}
+
 let log = this.cm.Logger.log
 let zlog = (value, lhs) => {
   this.cm.Logger.log(value,2)
-  assignedSequence.push({lhs, value, at:visitedSequence.length})
+  let index = visitedSequence.length - 1
+  if(!assignedSequence[index]) assignedSequence[index] = []
+  assignedSequence[index].push({lhs, value})
 }
 
 this.visited = (index) => { 
   //called when a statement is visited
-  //console.log(loc)
+  //console.log(loc)console.log("clear");
   let loc = locationList[index]
   visitedSequence.push(index)
   visitedLines[loc.start.line] = visitedLines[loc.start.line] + 1 || 1
@@ -82,18 +74,15 @@ const getText = (node) => {
   if(node.start === undefined || !node.end === undefined) return "Missing start or end"
   return source.substr(node.start, node.end - node.start)
 }
-
-const addInstrumentation = (t, path, before, code) =>{ //add instrumentation before or after a node(by path)
-  //add instrumentation (a string) before or after the path node
-  
-  //insert a dummy before or after the node
+const addInstrumentationPath = (t, path, before) =>{ //add instrumentation before or after a node(by path)
   let insert = before ? path.insertBefore : path.insertAfter
   insert = insert.bind(path)
  
-  if(before)
+  if(diags.showInstrumentation) {
+    if(before)
     console.log(path.type, code, getText(path.node))
-  else
-    console.log(path.type, getText(path.node),code)
+   else
+    console.log(path.type, getText(path.node),code)}
   insert(
     t.expressionStatement(t.stringLiteral("stuff here")))
   
@@ -101,23 +90,32 @@ const addInstrumentation = (t, path, before, code) =>{ //add instrumentation bef
   //now get the dummy node that was just added 
   let diff = before ? -1 : 1
   let sib = path.getSibling(path.key + diff) 
-  
-  //Now replace that node with code from the string
-  sib.replaceWithSourceString(code)
+  return sib
+}
+const replacePathWithCode = (t, oldPath, newPath, code) =>{
+  newPath.replaceWithSourceString(code)
   
   //update the node's location information
-  sib.node.loc = path.node.loc
-  sib.node.start = path.node.start
-  sib.node.end = path.node.end
-  
-  
+  newPath.node.loc = oldPath.node.loc
+  newPath.node.start = oldPath.node.start
+  newPath.node.end = oldPath.node.end
   //flag node as instrumentation
-  sib.node.isInstrumentation = true; 
+  newPath.node.isInstrumentation = true; 
+}
+const addInstrumentation = (t, path, before, code) =>{ 
+  //add instrumentation (a string) before or after the path node
+  let newPath = addInstrumentationPath(t, path, before)
+  replacePathWithCode(t, path, newPath, code)
 }
 
 const addLogging = (t, path, expr) =>{
   //add code to log the value of the prior operation
   addInstrumentation(t, path, false, `zlog(${expr},"${expr}")`)
+}
+const setBreakLine = (line, value) => {
+  if(breakLines[line] === undefined || breakLines[line] === true)
+    breakLines[line]= value
+
 }
 
 const plugin = (babel) =>{
@@ -127,9 +125,9 @@ const plugin = (babel) =>{
       
       Statement:{ 
         exit(path){
-        //console.log("statement",getText(path.node))
+    
         if(path.node.isInstrumentation) {
-          console.log("Attempt to add to instrumentation at " + getText(path.node))
+          if(diags.showAttemptToAdd) console.log("Attempt to add to instrumentation at " + getText(path.node))
           return;
         }
         if(!path.node.loc) {
@@ -138,16 +136,29 @@ const plugin = (babel) =>{
         }
         //encode the source locator and instrument the visit
         locationList.push(path.node.loc)
-        addInstrumentation(t, path, true, `this.visited(${locationList.length - 1})\n`)
-                
+        if(t.isForStatement(path)) {
+          ///console.log("For statement", getText(path.node))
+          let entryLoc = path.get('body').node.body[0].loc
+          console.log(entryLoc)
+          setBreakLine(entryLoc.start.line,false)
+          path.get('body').unshiftContainer('body', t.expressionStatement(t.stringLiteral('before')));
+          path.get('body').pushContainer('body', t.expressionStatement(t.stringLiteral('after')));
+          console.log(path.get('body').node)
+          //addInstrumentation(t, path, true, `this.enterFor(${locationList.length - 1})\n`)
+        }else {
+          if(t.isBlockStatement(path)) {
+            console.log(path.type)
+          } else {
+            addInstrumentation(t, path, true, `this.visited(${locationList.length - 1})\n`)
+          }
         if(!path.node.loc) {
           console.log("No node loc" + getText(path.node))
         }  else {
-          breakLines[path.node.loc.start.line] = true
+          setBreakLine(path.node.loc.start.line,true)
         }
         if(t.isVariableDeclaration(path)) {
           let declarations = path.get("declarations")
-          
+          path.get('body')
           for(let declaration of declarations){
             if(getText(declaration.node.init)){
             	addLogging(t, path, getText(declaration.node.id))
@@ -157,7 +168,7 @@ const plugin = (babel) =>{
         if( t.isExpressionStatement(path) ){
         	//path.stop()
           	let expr = path.get("expression")
-            log(expr.type)
+            
             if(t.isAssignmentExpression(expr)){
               let left = expr.get("left")
               let text = getText(expr.get("left").node)
@@ -165,6 +176,7 @@ const plugin = (babel) =>{
             }
         }
       }
+        }
  	 }
     }
   }
@@ -212,7 +224,7 @@ this.renderBreakDots = (cm) =>
 }
 try {
 
-console.log(source)
+if(diags.showCode) console.log(source)
 let output = Babel.transform( source,
       {
           // plugins: ['lolizer'], 
@@ -223,9 +235,8 @@ let output = Babel.transform( source,
 
 		} )
 		//console.log(breakLines)
-		console.log(output.code)
+		if(diags.showCompiled) console.log(output.code)
   		try{
-          console.log("BASE IS", base)
           this.cm.Logger.addSourceMap(output.map, base)
           this.renderBreakDots(this.cm)
           eval(output.code)
@@ -233,7 +244,6 @@ let output = Babel.transform( source,
           let sliderProps = this.codeSlider.sliderProps
           sliderProps.max = visitedSequence.length
           this.codeSlider.sliderChange(0)
-          console.log(sliderProps)
         }catch(e){
           console.log("RUNTIME ERROR", e)
         }
@@ -241,16 +251,31 @@ let output = Babel.transform( source,
 } catch(e){
   console.log("TRANSFORM ERROR", e);
 }
+
 this.sliderWasChanged = (value) =>{
-    this.cm.clearGutter("arrow-gutter")
-  this.renderArrowSymbol(this.cm, 240 + value)
+  this.cm.clearGutter("arrow-gutter")
+  let index = visitedSequence[+value]
+  if(index === undefined) return
+  let loc = locationList[index]
+  let line = loc.start.line
+  this.renderArrowSymbol(this.cm, line + base - 2)
+  
+  let assignments = assignedSequence[value]
+  if(!assignments) return
+  
+  let n = assignments.length
+  for(let i = 0; i < n; i++ ){
+    let assignment = assignments[i]
+    
+    this.cm.Logger.logDataAt(line + base -2,`${assignment.lhs}=${assignment.value}`)
+  }
+  
 
 }
-console.log(this.sliderWasChanged)
+
 let props = this.codeSlider.sliderProps
-props.max = 100
 //this.codeSlider.sliderChange(80)
-console.log(props)
+
 
 
 
