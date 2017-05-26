@@ -18,31 +18,34 @@ export default class CMLogger {
         this.showData = debounce(this.showData.bind(this), 100)
         this.mapping = lastMapping
     }
-    setMapping(mapping){
+    setMapping(mapping) {
         this.mapping = mapping
         lastMapping = mapping
     }
-    addBGClass(line,className){
+    addBGClass(line, className) {
         this.cm.addLineClass(line - 1, "background", className)
     }
-    removeBGClass(line,className){
+    removeBGClass(line, className) {
         this.cm.removeLineClass(line - 1, "background", className)
     }
-    removeBGClassAll(className){
-        this.cm.eachLine( handle => {
-        let line = this.cm.getLineNumber(handle)
-        this.removeBGClass(line,className);
+    removeBGClassAll(className) {
+        this.cm.eachLine(handle => {
+            let line = this.cm.getLineNumber(handle)
+            this.removeBGClass(line, className);
         })
+    }
+    removeNode(node) {
+        if (node && node.parentElement)
+            node.parentElement.removeChild(node)
+        else
+            console.log("missing parent", node)
     }
     clearByClass(className) {
         let logs = document.getElementsByClassName(className);
         let n = logs.length
         for (let i = 0; i < n; i++) {
-            let log = logs[i]
-            if(log && log.parentElement)
-              log.parentElement.removeChild(log)
-            else
-              console.log("missing parent", log)
+            let node = logs[i]
+            this.removeNode(node)
         }
     }
     clearLogs() {
@@ -50,24 +53,25 @@ export default class CMLogger {
         this.clearByClass("errormessage");
     }
     logErrorAtLine(line, text) {
-        this.logAtLine(line, text, "errormessage")
+        return this.logAtLine(line, text, "errormessage")
     }
     logMessageAtLine(line, text) {
-        this.logAtLine(line, text, "logdata")
+        return this.logAtLine(line, text, "logdata")
     }
     logAtLine(line, text, className) {
         let ch = this.cm.getLine(line).length
-        this.logAtPos({ line, ch }, text, className)
+        return this.logAtPos({ line, ch }, text, className)
     }
     logAtPos(pos, text, className) {
         let node = document.createElement("span")
         node.innerHTML = text
         node.className = className;
         this.cm.addWidget(pos, node)
+        return node
     }
-    renderAtPos(pos, elements, className){
+    renderAtPos(pos, elements, className) {
         let node = document.createElement("div")
-        render(elements, node )
+        render(elements, node)
         node = node.children[0]
         node.className = node.className + " " + className;
         this.cm.addWidget(pos, node)
@@ -84,12 +88,7 @@ export default class CMLogger {
         }
     }
     logDataAt(line, value) {
-        let values = this.logLines[line]
-        if (!values) {
-            this.logLines[line] = values = []
-        }
-        values.push(value);
-        this.showData()
+        return this.logMessageAtLine(line, value);
     }
 
     addSourceMap(map, offset) {
@@ -121,19 +120,19 @@ export default class CMLogger {
             return this.getPosition({ line, column })
         }
     }
-    log(output, depth = 1){
+    log(output, depth = 1) {
         // console.log(this.mapping)
         let line = this.getCallerLine(depth);
         //console.log(line, output)
         let logLine = line - 2
-        if(typeof output === "function"){
+        if (typeof output === "function") {
             output = "function"
         }
-        this.logDataAt(logLine , output)
+        this.logDataAt(logLine, output)
         //console.log(this.mapping)
         let altLine = this.mapping[logLine];
-        if(altLine){
-            this.logDataAt(altLine , output)
+        if (altLine) {
+            this.logDataAt(altLine, output)
         }
     }
 
@@ -142,14 +141,15 @@ export default class CMLogger {
         return this.parseStackFrame(stackFrames[2 + n]).line
     }
     displayError(e) {
+        console.log("ERROR",e)
         let stackFrames = e.stack.split("\n")
         let line = this.parseStackFrame(stackFrames[1]).line
         let message = stackFrames[0]
-        let logLine = line -2
+        let logLine = line - 2
         this.logErrorAtLine(logLine, message)
         let altLine = this.mapping[logLine];
-        if(altLine){
-            this.logErrorAtLine(altLine , message)
+        if (altLine) {
+            this.logErrorAtLine(altLine, message)
         }
     }
 }
