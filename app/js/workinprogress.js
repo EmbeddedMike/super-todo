@@ -1,3 +1,6 @@
+/* changes
+//end
+endchanges */
 console.clear()
 
 /* changes
@@ -34,12 +37,13 @@ let diags ={
   showAttemptToAdd: false
   }
 let Span = exported.glamorous.Span
-let CodeSlider = () => <Span  fontSize={20} zIndex="2" backgroundColor="red"
+/*let CodeSlider = () => <Span  fontSize={20} zIndex="2" backgroundColor="red"
       textAlign="center">Hello world</Span>
 let DisplayString = (string) => 1
 this.cm.Logger.renderAtPos({line: 42, ch:2}, <CodeSlider/>, "helloClass")
 let clear = () => { this.cm.Logger.clearByClass("helloClass")}
 setTimeout(clear.bind(this), 3000) 
+*/
 
 
 let breakLines = []      //Lines with breakpoints
@@ -245,7 +249,10 @@ let output = Babel.transform( source,
           //console.log(visitedLines)
           let sliderProps = this.codeSlider.sliderProps
           sliderProps.max = visitedSequence.length
+          sliderProps.markerLabel= [{ value: 3, label: <div className="breakdot"></div> },
+              { value: 8, label: 'EIGHT' }]
           this.codeSlider.sliderChange(0)
+          
         }catch(e){
           console.log("RUNTIME ERROR", e)
         }
@@ -276,10 +283,6 @@ this.sliderWasChanged = (value) =>{
 }
 
 let props = this.codeSlider.sliderProps
-//this.codeSlider.sliderChange(80)
-
-
-
 
 /*
 console.clear()

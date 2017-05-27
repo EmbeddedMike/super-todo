@@ -54,7 +54,10 @@ window.onbeforeunload = function () {
 class CodeSlider extends React.Component {
     constructor(props) {
         super(props);
-        this.sliderProps = { value: 5, min: 0, max: 10, markers: [{ value: 3, label: 'Three' }, { value: 8, label: 'Eight' }] }
+        this.sliderProps = { value: 5, 
+            min: 0, max: 20,
+             markerLabel: [{ value: 3, label: 'Three' },
+              { value: 8, label: 'Eight' }] }
     }
     sliderUpdate(value) {
         console.log(value)
@@ -82,7 +85,7 @@ class CodeSlider extends React.Component {
             min={this.sliderProps.min}
             max={this.sliderProps.max}
             ticks
-            markers={this.sliderProps.markers}
+            markerLabel={this.sliderProps.markerLabel}
             onChange={this.sliderChange.bind(this)}
         />)
     }
