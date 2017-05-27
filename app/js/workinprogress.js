@@ -21,6 +21,7 @@ for( let i = 0; i < 3; i++ ){
 }
 
 `
+
 /* changes//console.log(source)
 
 //end
@@ -185,10 +186,11 @@ const plugin = (babel) =>{
 this.cm.clearGutter("breakpoint-gutter")
 this.gutterClick1 = (cm, line, gutter, event) =>{
   if(gutter != "breakpoint-gutter") return;
-  if(breakLines[line] != undefined){
-    breakLines[line] = !breakLines[line]
+  let ref = line - (base - 2)
+  if(breakLines[ref] != undefined){
+    breakLines[ref] = !breakLines[ref]
   }
-  this.renderOne(cm, line, breakLines[line])
+  this.renderOne(cm, line, breakLines[ref])
 }
 this.renderBreakSymbol = (cm,line,className) => {
   this.renderGutterSymbol(cm,line,"breakpoint-gutter", className)

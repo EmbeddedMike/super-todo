@@ -17,6 +17,8 @@ require('codemirror/addon/scroll/annotatescrollbar');
 require('codemirror/addon/search/matchesonscrollbar');
 require('codemirror/addon/search/matchesonscrollbar.css');
 require('nw-react-slider/dist/nw-react-slider.css')
+require('mdi/css/materialdesignicons.css')
+require("font-awesome-webpack")
 require('codemirror/lib/codemirror.css');
 require('codemirror/addon/mode/simple');
 require('codemirror/mode/javascript/javascript');
@@ -285,6 +287,8 @@ class CodeEditor extends React.Component {
                 "breakpoint-gutter"]
         };
         return (<div className="codeEditor">
+            <i className="material-icons face">face</i>
+            <i className="fa fa-twitter"></i>
             <CodeSlider 
             sliderWasChanged={this.sliderWasChanged}
              parentComponent={this}
