@@ -83,11 +83,11 @@ _this.testFunction = (param) => {
 BaseCodeMirror.defineSimpleMode("GTDFlow", {
   // The start state contains the rules that are intially used
   start: [
-     {regex: /\s*#.*$/, token: "header", sol: true},#?
+     {regex: /\s*#.*$/, token: "header", sol: true},
      {regex: /\/\*/, token: "comment", next: "comment"},
      {regex: /\/\/.*/, token: "comment"},
      {regex: /([\w\s])+/, token: "normal"},
-     {regex: /([#@]\w+\?)/, token: "error"},#? @?
+     {regex: /([#@]\w+\?)/, token: "error"},
      {regex: /(@\w+)/, token: "context"},
      {regex: /(#\w+)/, token: "category"},
      {regex: /(\[.*\])/, token: "markdownlink", next: "linktarget"},
