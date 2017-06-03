@@ -16,11 +16,10 @@ import Root from './containers/Root';
 //     console.log('socket really really connected');
 // });
 const store = configureStore();
-const history = syncHistoryWithStore(browserHistory, store);
 
 render(
     <AppContainer>
-        <Root store={store} history={history} />
+        <Root store={store} />
     </AppContainer>,
     document.getElementById('root')
 );

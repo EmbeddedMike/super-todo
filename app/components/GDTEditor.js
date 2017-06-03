@@ -2,7 +2,7 @@ const React = require('react'); //feature: react
 const CodeMirror = require('react-codemirror');
 import SocketStatus from "./socketStatus";
 const BaseCodeMirror = require('codemirror/lib/codemirror')
-import CodeEditor from "./CodeEditor"
+
 require('codemirror/addon/dialog/dialog')
 require('codemirror/addon/search/searchcursor')
 require('codemirror/addon/search/search')
@@ -375,6 +375,7 @@ class GDTEditor extends React.Component {
 				const startConfig = this.findSectionByName("#configstart");
 				const endConfig = this.findSectionByName("#configend");
 				console.clear()
+				console.log(startConfig,endConfig)
 				this.cm.setOption("mode", "gfm")
 				if (startConfig >= 0 && endConfig) {
 					this.config = this.cm.getRange({ line: startConfig + 1, ch: 0 }, { line: endConfig - 1, ch: null })
@@ -400,8 +401,6 @@ class GDTEditor extends React.Component {
 	}
 
 	componentDidMount() {
-		console.log("Did Mount")
-
 		this.textInput.value = this.props.user;
 	}
 
@@ -437,7 +436,7 @@ class GDTEditor extends React.Component {
 		};
 
 
-		return (<div className="gdtContainer" >
+		return (
 			<div className="gdtEditor">
 				<input
 					ref={(input) => { this.textInput = input }}
@@ -453,8 +452,8 @@ class GDTEditor extends React.Component {
 
 				/>
 			</div>
-			<CodeEditor gdtEditor={this} className="gdtCode"/>
-		</div>)
+		
+		)
 	}
 };
 
@@ -479,3 +478,36 @@ export default connect(
 	mapDispatchToProps
 )(GDTEditor);
 // check if HMR is enabled
+BaseCodeMirror.defineSimpleMode("GTDFlow", {
+  // The start state contains the rules that are intially used
+  start: [
+     {regex: /\s*#.*$/, token: "header", sol: true},
+     {regex: /\/\*/, token: "comment", next: "comment"},
+     {regex: /\/\/.*/, token: "comment"},
+     {regex: /([\w\s])+/, token: "normal"},
+     {regex: /([#@]\w+\?)/, token: "error"},
+     {regex: /(@\w+)/, token: "context"},
+     {regex: /(#\w+)/, token: "category"},
+     {regex: /(\[.*\])/, token: "markdownlink", next: "linktarget"},
+     
+     
+  ],
+  // The multi-line comment state.
+  linktarget:[
+    {regex: /(\(.*\))/, token: "markdowntarget", next: "start"},
+    {regex: /.*/, token: "error", next:"start"}
+    ],
+  comment: [
+    {regex: /.*?\*\//, token: "comment", next: "start"},
+    {regex: /.*/, token: "comment"}
+  ],
+  // The meta property contains global information about the mode. It
+  // can contain properties like lineComment, which are supported by
+  // all modes, and also directives like dontIndentStates, which are
+  // specific to simple modes.
+  meta: {
+    dontIndentStates: ["comment"],
+    lineComment: "//",
+    fold: "indent"
+  }
+});
