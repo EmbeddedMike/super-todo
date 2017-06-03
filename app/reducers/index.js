@@ -1,16 +1,17 @@
 import { routerReducer as routing } from 'react-router-redux';
 import { combineReducers } from 'redux';
 import * as types from '../actions/types';
-
-const filter = (state = '', action) => {
-    // console.log("FILTER REDUCER")
+const commandState = (state = [], action) => {
     switch (action.type) {
-        case types.FILTER:
-            return action.filter;
+        case "test":
+            console.log("newest reducer" , action.data, state.length)
+            return [...state, action.data]
         default:
-            return state;
+            return state
     }
-};
+    
+}
+
 const user = (state = '', action) => {
     // console.log("User Reducer", types, action)
     switch (action.type) {
@@ -20,14 +21,7 @@ const user = (state = '', action) => {
             return state;
     }
 };
-const todos = (state = '', action) => {
-    switch (action.type) {
-        case types.SET_TODOS:
-            return action.todos;
-        default:
-            return state;
-    }
-};
+
 const editorAction = (state = {}, action) => {
     switch (action.type) {
         case "editorAction":
@@ -39,11 +33,9 @@ const editorAction = (state = {}, action) => {
 
 
 const rootReducer = combineReducers({
-    filter,
     user,
-    todos,
-    routing,
-    editorAction
+    editorAction,
+    commandState
 });
 
 export default rootReducer;
