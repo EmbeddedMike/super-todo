@@ -3,95 +3,95 @@ let commandList = [];
 let startTime = new Date();
 let execCommand = (cmd) => {
     console.log(cmd);
-	this.cm.execCommand(cmd)
+    this.cm.execCommand(cmd)
 }
 let rerunCommands = () => {
-  let n = commandList.length
-  for( let i = 0; i < n; i++ ){
-    let entry = commandList[i]
-    setTimeout( () => execCommand(entry.command), entry.time)
-  }
+    let n = commandList.length
+    for (let i = 0; i < n; i++) {
+        let entry = commandList[i]
+        setTimeout(() => execCommand(entry.command), entry.time)
+    }
 }
 let makeFunction = (commands, key) => {
-  let oldFn = commands[key]
-  let newFn = (cm) => {
-    commandList.push({time: (new Date() - startTime), command: key});
-    return oldFn(cm)
-  }
-  newFn.oldFn = oldFn
-  commands[key] = newFn
+    let oldFn = commands[key]
+    let newFn = (cm) => {
+        commandList.push({ time: (new Date() - startTime), command: key });
+        return oldFn(cm)
+    }
+    newFn.oldFn = oldFn
+    commands[key] = newFn
 }
 let restoreFunction = (commands, key) => {
-  commands[key] = commands[key].oldFn
+    commands[key] = commands[key].oldFn
 }
 
 let doCommands = (fn) => {
-  let commands = BaseCodeMirror.commands
-  let keys = Object.keys(commands)
-  let n = keys.length;
-  for(let i = 0; i < n; i++) {
-    fn(commands,keys[i])
-  }
+    let commands = BaseCodeMirror.commands
+    let keys = Object.keys(commands)
+    let n = keys.length;
+    for (let i = 0; i < n; i++) {
+        fn(commands, keys[i])
+    }
 }
-let restoreCommands = () =>{
-  console.log("restore")
-  doCommands(restoreFunction);
-  rerunCommands()
+let restoreCommands = () => {
+    console.log("restore")
+    doCommands(restoreFunction);
+    rerunCommands()
 }
-setTimeout( restoreCommands, 3000);
+setTimeout(restoreCommands, 3000);
 doCommands(makeFunction)
 return
 class CMLogger {
-  constructor(cm) {
-    this.cm = cm
-    this.logLines = []
-  }
-  deleteLogs(){
-    let logs = document.getElementsByClassName("logdata");
-    if (logs.length === 0) return;
-    let list = []
-    let log;
-    for (log of logs) {
-        list.push(log)
+    constructor(cm) {
+        this.cm = cm
+        this.logLines = []
     }
- 
-    while (log = list.pop()) {
-        console.log(log);
-        log.parentElement.removeChild(log)
+    deleteLogs() {
+        let logs = document.getElementsByClassName("logdata");
+        if (logs.length === 0) return;
+        let list = []
+        let log;
+        for (log of logs) {
+            list.push(log)
+        }
+
+        while (log = list.pop()) {
+            console.log(log);
+            log.parentElement.removeChild(log)
+        }
     }
-  }
-  logAtLine(line,text) {
-    this.widgets = []
+    logAtLine(line, text) {
+        this.widgets = []
 
- 
-    let ch = this.cm.getLine(line).length
 
-    let node = document.createElement("span")
-    node.innerHTML = text
-    node.className = "logdata";
+        let ch = this.cm.getLine(line).length
 
-    let widget = this.cm.addWidget({ line: line, ch: ch }, node)
-    console.log(line, ch, text);
-    //setTimeout( () => node.parentElement.removeChild(node), 1000 );
-  }
-  showData(){
-      let values = this.logLines;
-      let n = values.length;
-      for (let i = 0; i < n; i++) {
-          let value = values[i]
-          if (value) {
-              console.log(value, i)
-              this.logAtLine(i - 1, value);
-          }
-      }
-  }
-  logDataAt(line,value){
-    let values = this.logLines[line]
-    if (!values) {
-        this.logLines[line] = values = []
+        let node = document.createElement("span")
+        node.innerHTML = text
+        node.className = "logdata";
+
+        let widget = this.cm.addWidget({ line: line, ch: ch }, node)
+        console.log(line, ch, text);
+        //setTimeout( () => node.parentElement.removeChild(node), 1000 );
     }
-    values.push(value);
-}
+    showData() {
+        let values = this.logLines;
+        let n = values.length;
+        for (let i = 0; i < n; i++) {
+            let value = values[i]
+            if (value) {
+                console.log(value, i)
+                this.logAtLine(i - 1, value);
+            }
+        }
+    }
+    logDataAt(line, value) {
+        let values = this.logLines[line]
+        if (!values) {
+            this.logLines[line] = values = []
+        }
+        values.push(value);
+    }
 
 }
 
@@ -100,18 +100,19 @@ L.deleteLogs()
 
 let smcs = []
 let addSourceMap = (map, offset) =>
- 
-  smcs.push({
-  map: (new SourceMap.SourceMapConsumer(map)),
-  offset: offset}
-  )
-addSourceMap(output.map, 0);  
-  
+
+    smcs.push({
+        map: (new SourceMap.SourceMapConsumer(map)),
+        offset: offset
+    }
+    )
+addSourceMap(output.map, 0);
+
 let getPosition = (spec) => {
     let n = smcs.length - 1;
     for (let i = n; i > -1; i--) {
         let pos = smcs[i].map.originalPositionFor(spec)
-        pos.line += smcs[i].offset  	
+        pos.line += smcs[i].offset
         if (pos.source) return pos;
     }
 }
@@ -151,8 +152,8 @@ let CL = (output) => {
     L.logDataAt(line, output)
 }
 CL("This")
-for( let q = 0; q< 10; q++)
-  CL(q)
+for (let q = 0; q < 10; q++)
+    CL(q)
 let bar = () => {
     CL("in bar");
 }
@@ -162,7 +163,7 @@ let sourceOffset = 0
 
 let getSource = () => {
     sourceOffset = getCallerLine(0);
-return `
+    return `
 () => {
 CL("Source offset is " + sourceOffset)
 
@@ -198,7 +199,7 @@ try {
         console.log(output1.map.sources)
         let code = eval(output1.code);
 
-        addSourceMap(output1.map, sourceOffset); 
+        addSourceMap(output1.map, sourceOffset);
         code();
     } catch (e) {
         console.log(e)
