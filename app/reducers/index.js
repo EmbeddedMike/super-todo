@@ -1,15 +1,16 @@
 import { routerReducer as routing } from 'react-router-redux';
 import { combineReducers } from 'redux';
 import * as types from '../actions/types';
-const commandState = (state = [], action) => {
+
+const editorContents = (state = "", action) => {
     switch (action.type) {
-        case "test":
-            console.log("newest reducer" , action.data, state.length)
-            return [...state, action.data]
+        case "save_contents": 
+            console.log( "save " + action.data);
+           return action.data
         default:
             return state
     }
-    
+
 }
 
 const user = (state = '', action) => {
@@ -35,7 +36,7 @@ const editorAction = (state = {}, action) => {
 const rootReducer = combineReducers({
     user,
     editorAction,
-    commandState
+    editorContents
 });
 
 export default rootReducer;

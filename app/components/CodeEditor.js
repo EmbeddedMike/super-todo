@@ -144,7 +144,11 @@ class CodeEditor extends React.Component {
 
 
     saveCode(cm) {
-        console.log("this")
+        console.log("savings code")
+        this.props.dispatchAction({type:"save_contents", data: this.cm.getValue()})
+        this.bindAndCompile(cm)
+    }
+    bindAndCompile(cm){
         try {
             this.changer = new Changer(cm)
             this.debouncedCompile = debounce((cm) =>
@@ -241,17 +245,6 @@ class CodeEditor extends React.Component {
     gutterClick(cm, line, gutter, event) {
         this.gutterClick1(cm, line, gutter, event)
     }
-    testReducer(cm) {
-        console.log("trying to test")
-        try {
-            if (this.count === undefined ) this.count = 0
-            this.count++
-            this.props.dispatchTest({ type: "test", data: this.count })
-        } catch (e) {
-            console.log(e)
-        }
-
-    }
     initialize(cm) {
         if (!this.lastLine) this.lastLine = 0;
         if (!cm) return;
@@ -268,11 +261,12 @@ class CodeEditor extends React.Component {
         this.addCB("cursorActivity", debounce(this.cursorActivity, 50, true))
         this.cm.removeKeyMap("GTD");
         this.addCB("gutterClick", this.gutterClick)
-        this.saveCode(this.cm)
+        
+        this.bindAndCompile(this.cm)
+        this.cm.setValue(this.props.editorContents)
         this.cm.addKeyMap({
             name: "GTD",
             "Ctrl-F": "findPersistent",
-            "Ctrl-K": this.testReducer.bind(this),
             "Ctrl-S": this.saveCode.bind(this)
         })
     }
@@ -307,7 +301,7 @@ class CodeEditor extends React.Component {
             <MaterialButton text="pause" />
             <FAButton type="fa-twitter" />
             <FAButton contents="fa-twitter" />
-            <div>{this.props.commandState}</div>
+         
 
             <CodeSlider
                 sliderWasChanged={this.sliderWasChanged}
@@ -322,17 +316,19 @@ class CodeEditor extends React.Component {
 
     }
     componentWillReceiveProps(nextProps) {
-        console.log("Motively", nextProps, this.props)
+        console.log("Now props", nextProps, this.props)
+        console.log("Setting", nextProps.editorContents)
+        this.cm.setValue(nextProps.editorContents)
     }
 }
 import { connect } from "react-redux";
 const mapStateToProps = (state, ownProps) => {
     console.log("Mappers state callback")
-	return {commandState: state.commandState }
+	return {editorContents: state.editorContents }
 }
 const mapDispatchToProps = (dispatch, ownProps) => {
     return {
-        dispatchTest: (action) => {
+        dispatchAction: (action) => {
             dispatch(action)
         }
     }
