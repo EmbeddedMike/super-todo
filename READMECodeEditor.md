@@ -20,11 +20,6 @@ Some of these things are related to code that you are writing:
 2. Time spent locating the cause of an error
 3. Time spent figuring out where to insert the code for a change
 
-## Code Editor's Solution
-
-
-
-
 
 ## The problem with testing
 Some people Test Driven Development, writing tests before they write code. Of those, some write fine grained tests some write coarse-grained tests. Some develop their code without tests, then write tests after-the fact to detect regressions as they change code.
@@ -32,3 +27,6 @@ Some people Test Driven Development, writing tests before they write code. Of th
 When there's a bug, think of the cause of the problem as a needle, and the pile of code where the needle might appear as the haystack. A test is a needle detector--a good thing. But tests always increase the size of the haystack--you never know if the cause of the failure is in the test code or the code under test.
 
 If write granular tests, it will almost certainly take more time to write a set of tests than to write the code. And while you are when there's a bug it's not clear if it's in the code, or in the test. If you write coarse-grained tests, then when a test fails the haystack (pile of code) that hides the cause of failure is larger than the code you are testing (it includes the test code, too.)
+
+## Sections
+//Section name:<name> bind:<name> plugins[<list>]
