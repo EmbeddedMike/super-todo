@@ -19,6 +19,7 @@ require('codemirror/addon/search/matchesonscrollbar.css');
 require('nw-react-slider/dist/nw-react-slider.css')
 require('mdi/css/materialdesignicons.css')
 require("font-awesome-webpack")
+import FAButton from "./FAButton"
 require('codemirror/lib/codemirror.css');
 require('codemirror/addon/mode/simple');
 require('codemirror/mode/javascript/javascript');
@@ -51,13 +52,17 @@ const debounce = require("debounce")
 window.onbeforeunload = function () {
     return "Are you sure you want to navigate away?";
 }
+const MaterialButton = (props) => {
+    return <i className="material-icons">{props.text}</i>
+}
+
 class CodeSlider extends React.Component {
     constructor(props) {
         super(props);
-        this.sliderProps = { value: 5, 
+        this.sliderProps = {
+            value: 5,
             min: 0, max: 20,
-             markerLabel: [{ value: 3, label: 'Three' },
-              { value: 8, label: 'Eight' }] }
+        }
     }
     sliderUpdate(value) {
         console.log(value)
@@ -65,7 +70,7 @@ class CodeSlider extends React.Component {
     sliderChange(value) {
         this.sliderProps.value = value
         //this.sliderUpdate(value)
-        if(this.props.parentComponent.sliderWasChanged){
+        if (this.props.parentComponent.sliderWasChanged) {
             this.props.parentComponent.sliderWasChanged(value)
         }
         // if(this.props.sliderWasChanged)
@@ -189,8 +194,6 @@ class CodeEditor extends React.Component {
                     (param)=> {
                             let something = "a variable"
                             let something_else = "another"
-                            console.log('STUFF');
-                            console.log(this);
                             return <div>this is JSX</div>
                         }
                     `
@@ -205,7 +208,6 @@ class CodeEditor extends React.Component {
                 },
             )
             try {
-                console.log("EVALING")
                 let code = eval(output.code).bind(this);
                 let Logger
                 if (initial) {
@@ -229,7 +231,6 @@ class CodeEditor extends React.Component {
             }
 
         } catch (e) {
-            console.log("Show Error")
             this.showError(e)
             console.log(e)
         }
@@ -239,6 +240,17 @@ class CodeEditor extends React.Component {
     }
     gutterClick(cm, line, gutter, event) {
         this.gutterClick1(cm, line, gutter, event)
+    }
+    testReducer(cm) {
+        console.log("trying to test")
+        try {
+            if (this.count === undefined ) this.count = 0
+            this.count++
+            this.props.dispatchTest({ type: "test", data: this.count })
+        } catch (e) {
+            console.log(e)
+        }
+
     }
     initialize(cm) {
         if (!this.lastLine) this.lastLine = 0;
@@ -260,6 +272,7 @@ class CodeEditor extends React.Component {
         this.cm.addKeyMap({
             name: "GTD",
             "Ctrl-F": "findPersistent",
+            "Ctrl-K": this.testReducer.bind(this),
             "Ctrl-S": this.saveCode.bind(this)
         })
     }
@@ -267,10 +280,10 @@ class CodeEditor extends React.Component {
     codeSliderRef(ref) {
         this.codeSlider = ref
     }
-    sliderWasChanged(val){
+    sliderWasChanged(val) {
         console.log("SLIDER CHANGED TO ", val)
     }
-    
+
     render() {
         var options = {
             lineNumbers: true,
@@ -290,12 +303,16 @@ class CodeEditor extends React.Component {
                 "breakpoint-gutter"]
         };
         return (<div className="codeEditor">
-            <i className="material-icons face">face</i>
-            <i className="fa fa-twitter"></i>
-            <CodeSlider 
-            sliderWasChanged={this.sliderWasChanged}
-             parentComponent={this}
-             ref={(entry) => { this.codeSliderRef(entry) }}/>
+            <MaterialButton text="face" />
+            <MaterialButton text="pause" />
+            <FAButton type="fa-twitter" />
+            <FAButton contents="fa-twitter" />
+            <div>{this.props.commandState}</div>
+
+            <CodeSlider
+                sliderWasChanged={this.sliderWasChanged}
+                parentComponent={this}
+                ref={(entry) => { this.codeSliderRef(entry) }} />
             <CodeMirror
                 ref={(entry) => { this.initialize(entry) }}
                 onChange={this.onChange.bind(this)}
@@ -304,6 +321,25 @@ class CodeEditor extends React.Component {
             </div>)
 
     }
+    componentWillReceiveProps(nextProps) {
+        console.log("Motively", nextProps, this.props)
+    }
 }
-export default CodeEditor;
+import { connect } from "react-redux";
+const mapStateToProps = (state, ownProps) => {
+    console.log("Mappers state callback")
+	return {commandState: state.commandState }
+}
+const mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        dispatchTest: (action) => {
+            dispatch(action)
+        }
+    }
+}
 
+//export default CodeEditor;
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(CodeEditor);
