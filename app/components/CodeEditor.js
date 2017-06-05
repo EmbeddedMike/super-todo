@@ -8,7 +8,7 @@ require('codemirror/addon/search/searchcursor')
 require('codemirror/addon/search/search')
 let SourceMap = require("source-map")
 require('codemirror/keymap/sublime')
-
+let immutable = require('immutable')
 import throttle from 'lodash/throttle';
 import { render } from 'react-dom'
 import glamorous from "glamorous"
@@ -224,7 +224,8 @@ class CodeEditor extends React.Component {
                 let exported = {
                     source, output,
                     SourceMap, GDTEditor: this.props.gdtEditor, CodeEditor,
-                    throttle, debounce, Logger, Changer, render, glamorous
+                    throttle, debounce, Logger, Changer, render, glamorous,
+                    immutable
                 }
 
 
