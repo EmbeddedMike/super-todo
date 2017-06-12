@@ -149,13 +149,18 @@ class CodeEditor extends React.Component {
         this.bindAndCompile(cm)
     }
     bindAndCompile(cm){
+        this.exported = {
+                    SourceMap, GDTEditor: this.props.gdtEditor, CodeEditor,
+                    throttle, debounce, Changer, render, glamorous,
+                    immutable
+                }
         try {
-            this.changer = new Changer(cm)
+            //this.changer = new Changer(cm)
             this.debouncedCompile = debounce((cm) =>
                 this.compileCode(cm), 800);
             this.modChange = debounce((cm) => {
                 this.cm.Logger.clearLogs()
-                this.changer.syncChanges(cm)
+                //this.changer.syncChanges(cm)
                 this.debouncedCompile(cm)
                 //setTimeout( this.clearError.bind(this), 2000)
             }, 300, false)
@@ -193,15 +198,6 @@ class CodeEditor extends React.Component {
     compileAndRun(source, offset, initial) {
         source = "(exported) => {\n" + source + "}"
         try {
-            // let func = "(param)=> {" + source + "}"
-            let func = `
-                    (param)=> {
-                            let something = "a variable"
-                            let something_else = "another"
-                            return <div>this is JSX</div>
-                        }
-                    `
-            //console.clear()
             let output = Babel.transform(source,
                 {
                     // plugins: ['lolizer'], 
@@ -213,23 +209,13 @@ class CodeEditor extends React.Component {
             )
             try {
                 let code = eval(output.code).bind(this);
-                let Logger
                 if (initial) {
-                    Logger = new CMLogger(this.cm, output.map);
+                    new CMLogger(this.cm, output.map);
                 }
                 else {
-                    Logger = this.cm.Logger
                     this.cm.Logger.addSourceMap(output.map, offset)
                 }
-                let exported = {
-                    source, output,
-                    SourceMap, GDTEditor: this.props.gdtEditor, CodeEditor,
-                    throttle, debounce, Logger, Changer, render, glamorous,
-                    immutable
-                }
-
-
-                code(exported);
+                code(this.exported);
             } catch (e) {
                 this.showRuntimeError(e);
                 console.log(e)
