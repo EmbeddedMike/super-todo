@@ -40,17 +40,13 @@ export default class CMLogger {
         else
             console.log("missing parent", node)
     }
-    clearByClass(className) {
-        let logs = document.getElementsByClassName(className);
+    clearLogs() {
+        let logs = document.getElementsByClassName("annotation");
         let n = logs.length
         for (let i = 0; i < n; i++) {
             let node = logs[i]
             this.removeNode(node)
         }
-    }
-    clearLogs() {
-        this.clearByClass("logdata")
-        this.clearByClass("errormessage");
     }
     logErrorAtLine(line, text) {
         return this.logAtLine(line, text, "errormessage")
@@ -65,7 +61,7 @@ export default class CMLogger {
     logAtPos(pos, text, className) {
         let node = document.createElement("span")
         node.innerHTML = text
-        node.className = className;
+        node.className = className + " " + "annotation";
         this.cm.addWidget(pos, node)
         return node
     }
