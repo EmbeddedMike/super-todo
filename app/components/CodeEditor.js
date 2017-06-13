@@ -1,6 +1,7 @@
 const React = require('react'); //feature: react
 const CodeMirror = require('react-codemirror');
 import SocketStatus from "./socketStatus";
+
 const Babel = require("babel-standalone")
 const BaseCodeMirror = require('codemirror/lib/codemirror')
 require('codemirror/addon/dialog/dialog')
@@ -45,6 +46,7 @@ BaseCodeMirror.defineMode("changemode", function (config) {
         })
 })
 import CMLogger from '../js/cmlogger'
+import SegMapper from '../js/computeSegments'
 import Changer from "../js/syncchanges"
 import { setUser } from "../actions/index.js"
 const debounce = require("debounce")
@@ -120,7 +122,7 @@ class CodeEditor extends React.Component {
     //     //setTimeout( this.clearError.bind(this), 2000)
     // }, 50, false)
 
-    showError(e) {
+    showError(e, offset = 0) {
         let eLine = e.stack.split("\n")[0];
         console.log(eLine);
         let matcher = eLine.match(/^(.*):\s(.*):(.*)\((\d+):(\d+)/)
@@ -130,7 +132,7 @@ class CodeEditor extends React.Component {
             line = line - 1
             let ch = +matcher[5]
             message = "<pre>" + Array(ch).join(" ") + "^ </pre>" + message
-            this.cm.Logger.logAtPos({ line, ch: 0 }, message, "errormessage")
+            this.cm.Logger.logAtPos({ line: line + offset, ch: 0 }, message, "errormessage")
         } else {
             this.cm.Logger.logAtPos(this.cm.getCursor(), eLine, "errormessage")
         }
@@ -173,6 +175,16 @@ class CodeEditor extends React.Component {
 
     compileCode(cm) {
         let source = this.cm.getValue();
+        if(source.match(/NEWCOMPILE/) && this.compileSegments){
+            try{
+                this.compileSegments()
+                return
+            } catch(e){
+                console.log("Failed compileSegs")
+                console.log(e)
+                return
+            }
+        }
         let aLines = source.split("\n")
         let n = aLines.length
         let sTop = ""
@@ -222,7 +234,7 @@ class CodeEditor extends React.Component {
             }
 
         } catch (e) {
-            this.showError(e)
+            this.showError(e, offset)
             console.log(e)
         }
     }
@@ -235,6 +247,7 @@ class CodeEditor extends React.Component {
     initialize(cm) {
         if (!this.lastLine) this.lastLine = 0;
         if (!cm) return;
+        new SegMapper(this)
         this.cm = cm.getCodeMirror();
         // this.cm.setOption("fold", this.cm.constructor.fold.indent)
         if (module.hot) {
@@ -263,6 +276,9 @@ class CodeEditor extends React.Component {
     }
     sliderWasChanged(val) {
         console.log("SLIDER CHANGED TO ", val)
+    }
+    setSegMap(segMap){
+        this.segMap = segMap
     }
 
     render() {
