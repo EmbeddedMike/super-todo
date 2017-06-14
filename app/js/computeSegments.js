@@ -1,6 +1,6 @@
 //Segment  name: todo
 /*
-turn on compile with NEWCOMPILE   
+
 change duplicate name problem
 restore cursor after Ctrl-S
 Restore after HMR
@@ -24,13 +24,13 @@ console.log("NOSEGxy")
 //Segment  name: test, compile:true
 console.log("TESTED")
 
-//Segment  name: main
+//Segment  name: main compile:true
 //Compute an immutable map of segments matching the pattern /^(\/\/Segment\b.*$)
 //Each entry has a name and a set of attributes.
 //If compile:true is set, then the segment will be compiled normally
 //If compile: false is set, the segment will not be compiled
 //If compile: "<plugin>" it will be compiled with the named plugin
-
+console.log("MAIN")
 let segmentPattern = /(^\/\/Segment\b.*\n)/gm
 export default class SegMapper {
   constructor(codeEditor) {
@@ -99,6 +99,7 @@ export default class SegMapper {
 
   }
   compileChanges() {
+    //IF editor console.log("COMPILES5")
     this.oldMap = this.codeEditor.segMap || {}
     for(let segName in this.segMap){
       let entry = this.segMap[segName]
@@ -117,13 +118,7 @@ export default class SegMapper {
     this.compileChanges()
   }
 }
-//let s = new SegMapper(this)
-//console.log(s.codeEditor.compileSegments)
+//IF editor let s = new SegMapper(this)
+//turn on compile with NEWCOMPILE
 
-//s.codeEditor.compileSegments()
-//s.toSegments()
-//s.toMap()
-//s.compileSegments()
-//console.log(s.segMap.test)
-//console.log(s.segMap.initial.code.split("\n"))
 
