@@ -5,12 +5,12 @@ let lastMapping = []
 
 export default class CMLogger {
     //class CMLogger {
-    constructor(cm, map) {
+    constructor(cm, map, offset) {
         console.log("NEW LOGGER")
         this.cm = cm
         this.logLines = []
         this.smcs = []
-        this.addSourceMap(map, 0)
+        this.addSourceMap(map, offset)
         this.clearLogs()
         this.cm.Logger = this;
         this.log = this.log.bind(this)

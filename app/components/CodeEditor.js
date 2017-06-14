@@ -208,6 +208,9 @@ class CodeEditor extends React.Component {
         this.compileAndRun(sBottom, 0, false)
     }
     compileAndRun(source, offset, initial) {
+        source = source.replace(/export default\s*/,'')
+        source = source.replace(/\/\/IF editor\s*/g,'')
+        
         source = "(exported) => {\n" + source + "}"
         try {
             let output = Babel.transform(source,
@@ -222,7 +225,7 @@ class CodeEditor extends React.Component {
             try {
                 let code = eval(output.code).bind(this);
                 if (initial) {
-                    new CMLogger(this.cm, output.map);
+                    new CMLogger(this.cm, output.map, offset);
                 }
                 else {
                     this.cm.Logger.addSourceMap(output.map, offset)
