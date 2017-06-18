@@ -42,19 +42,19 @@ export default class CMLogger {
             console.log("missing parent", node)
     }
     clearWidgets() {
-        console.log("Clearing ", this.cm.widgets.length)
         for (let i = 0; i < this.cm.widgets.length; i++) {
             console.log(i)
             try {
                 this.cm.widgets[i].clear()
             } catch (e) { }
         }
+  
+        this.cm.widgets  = []
     }
     clearLogs() {
         this.clearWidgets()
         let logs = document.getElementsByClassName("annotation");
         let n = logs.length
-        console.log("LOGS TO DEELETE", n)
         for (let i = 0; i < n; i++) {
             let node = logs[i]
             this.removeNode(node)
