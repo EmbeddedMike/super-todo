@@ -8,6 +8,7 @@ export default class CMLogger {
     constructor(cm, map, offset) {
         console.log("NEW LOGGER")
         this.cm = cm
+        this.cm.widgets = this.cm.widgets || []
         this.logLines = []
         this.smcs = []
         this.addSourceMap(map, offset)
@@ -40,9 +41,20 @@ export default class CMLogger {
         else
             console.log("missing parent", node)
     }
+    clearWidgets() {
+        console.log("Clearing ", this.cm.widgets.length)
+        for (let i = 0; i < this.cm.widgets.length; i++) {
+            console.log(i)
+            try {
+                this.cm.widgets[i].clear()
+            } catch (e) { }
+        }
+    }
     clearLogs() {
+        this.clearWidgets()
         let logs = document.getElementsByClassName("annotation");
         let n = logs.length
+        console.log("LOGS TO DEELETE", n)
         for (let i = 0; i < n; i++) {
             let node = logs[i]
             this.removeNode(node)
@@ -58,6 +70,20 @@ export default class CMLogger {
         let ch = this.cm.getLine(line).length
         return this.logAtPos({ line, ch }, text, className)
     }
+    widgetBelowLine = (line, element, className = "logdata") => {
+        let node
+        if(typeof element === 'string'){
+            node = document.createElement("span")
+            node.innerHTML = element
+            node.className = className;
+        } else {
+            node = document.createElement("div")
+            render(element, node)
+            node = node.children[0]
+        }
+        this.cm.widgets.push(this.cm.addLineWidget(line, node))
+        return node
+    }
     logAtPos(pos, text, className) {
         let node = document.createElement("span")
         node.innerHTML = text
@@ -69,7 +95,7 @@ export default class CMLogger {
         let node = document.createElement("div")
         render(elements, node)
         node = node.children[0]
-        node.className = node.className + " " + className;
+        node.className = node.className + " " + "annotation";
         this.cm.addWidget(pos, node)
     }
     showData() {
@@ -137,15 +163,16 @@ export default class CMLogger {
         return this.parseStackFrame(stackFrames[2 + n]).line
     }
     displayError(e) {
-        console.log("ERROR",e)
+        console.log("ERROR", e)
         let stackFrames = e.stack.split("\n")
         let line = this.parseStackFrame(stackFrames[1]).line
         let message = stackFrames[0]
         let logLine = line - 2
-        this.logErrorAtLine(logLine, message)
+        if( logLine > this.cm.lineCount() - 1) logLine = this.cm.lineCount() - 1
+        this.widgetBelowLine(logLine, message)
         let altLine = this.mapping[logLine];
         if (altLine) {
-            this.logErrorAtLine(altLine, message)
+            this.widgetBelowLine(altLine, message)
         }
     }
 }
