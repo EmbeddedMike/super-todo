@@ -129,12 +129,13 @@ class CodeEditor extends React.Component {
         if (matcher) {
             let message = matcher[1] + " " + matcher[3]
             let line = +matcher[4]
-            line = line - 1
+            line = line - 2
             let ch = +matcher[5]
-            message = "<pre>" + Array(ch).join(" ") + "^ </pre>" + message
-            this.cm.Logger.logAtPos({ line: line + offset, ch: 0 }, message, "errormessage")
+            let MessageDiv = glamorous.div({backgroundColor: "#eee8aa"})
+            message = <MessageDiv ><pre>{Array(ch + 1).join(" ")+"^"}</pre>{message}</MessageDiv>
+            this.cm.Logger.widgetBelowLine(line, message)
         } else {
-            this.cm.Logger.logAtPos(this.cm.getCursor(), eLine, "errormessage")
+            this.cm.Logger.widgetBelowLine(this.cm.getCursor().line, eLine, "errormessage")
         }
     }
     cursorActivity(cm) {
@@ -143,19 +144,17 @@ class CodeEditor extends React.Component {
     actuallyMoved(cm) {
         //console.log("actually moved")
     }
-
-
     saveCode(cm) {
-        console.log("savings code")
-        this.props.dispatchAction({type:"save_contents", data: this.cm.getValue()})
+        console.log("saving code")
+        this.props.dispatchAction({ type: "save_contents", data: this.cm.getValue() })
         this.bindAndCompile(cm)
     }
-    bindAndCompile(cm){
+    bindAndCompile(cm) {
         this.exported = {
-                    SourceMap, GDTEditor: this.props.gdtEditor, CodeEditor,
-                    throttle, debounce, Changer, render, glamorous,
-                    immutable
-                }
+            SourceMap, GDTEditor: this.props.gdtEditor, CodeEditor,
+            throttle, debounce, Changer, render, glamorous,
+            immutable,Babel
+        }
         try {
             //this.changer = new Changer(cm)
             this.debouncedCompile = debounce((cm) =>
@@ -175,11 +174,11 @@ class CodeEditor extends React.Component {
 
     compileCode(cm) {
         let source = this.cm.getValue();
-        if(source.match(/NEWCOMPILE/) && this.compileSegments){
-            try{
+        if (source.match(/NEWCOMPILE/) && this.compileSegments) {
+            try {
                 this.compileSegments()
                 return
-            } catch(e){
+            } catch (e) {
                 console.log("Failed compileSegs")
                 console.log(e)
                 return
@@ -204,14 +203,21 @@ class CodeEditor extends React.Component {
         [i, sTop] = aSplit(0, n)
         let offset = i + 1
         let result = [i, sBottom] = aSplit(offset, n)
-        this.compileAndRun(sTop, 0, true)
-        this.compileAndRun(sBottom, 0, false)
+        this.compileAndRun(sTop, 0, true,"first")
+        this.compileAndRun(sBottom, 0, false, "second")
     }
-    compileAndRun(source, offset, initial) {
-        source = source.replace(/export default\s*/,'')
-        source = source.replace(/\/\/IF editor\s*/g,'')
-        
+    compileAndRun(source, offset, initial = true, name='default.js') {
+        source = source.replace(/export default\s*/, '')
+        source = source.replace(/\/\/IF editor\s*/g, '')
         source = "(exported) => {\n" + source + "}"
+        
+        // console.log("before",source)
+        // window._thisThing = this
+        // let gsources = `((exported) => {
+        //     ${source} 
+        // }).bind(window._thisThing)((ffwindow._thisThing.exported))`
+        // console.log("after", source)
+        
         try {
             let output = Babel.transform(source,
                 {
@@ -219,11 +225,35 @@ class CodeEditor extends React.Component {
                     presets: [["es2015", { modules: false }],
                         "react"],
                     sourceMap: "both",
-                    filename: "client"
+                    sourceFileName: name + ".js",
+                    sourceRoot: "root/",
+                    filenameRelative: name + ".js"
                 },
             )
             try {
-                let code = eval(output.code).bind(this);
+                let code = output.code
+                code += (`\n//# sourceURL=${name}.js\n`)
+                code = eval(code).bind(this);
+                // //console.log(output.map)
+                // //code = "//# sourceURL=clientZY.js\n"+code
+                // let addCode = (code) => {
+
+                //     var JS = document.createElement('script');
+                //     JS.text = code;
+                //     document.body.appendChild(JS);
+                //     return JS
+                // }
+                // let deleteCode = (node) => {
+                //     document.body.removeChild(node)
+                // }
+                // // let countScripts = () => console.log(document.getElementsByTagName("script").length)
+                // // countScripts()
+                // //let node = addCode(code)
+
+                // // countScripts()
+                // //deleteCode(node)
+                
+                // // countScripts()
                 if (initial) {
                     new CMLogger(this.cm, output.map, offset);
                 }
@@ -232,13 +262,13 @@ class CodeEditor extends React.Component {
                 }
                 code(this.exported);
             } catch (e) {
-                this.showRuntimeError(e);
+                this.cm.Logger.displayError(e);
                 console.log(e)
             }
 
         } catch (e) {
             this.showError(e, offset)
-            console.log(e)
+            //console.log(e)
         }
     }
     showRuntimeError(e) {
@@ -264,7 +294,7 @@ class CodeEditor extends React.Component {
         this.addCB("cursorActivity", debounce(this.cursorActivity, 50, true))
         this.cm.removeKeyMap("GTD");
         this.addCB("gutterClick", this.gutterClick)
-        
+
         this.bindAndCompile(this.cm)
         this.cm.setValue(this.props.editorContents)
         this.cm.addKeyMap({
@@ -280,7 +310,7 @@ class CodeEditor extends React.Component {
     sliderWasChanged(val) {
         console.log("SLIDER CHANGED TO ", val)
     }
-    setSegMap(segMap){
+    setSegMap(segMap) {
         this.segMap = segMap
     }
 
@@ -307,7 +337,7 @@ class CodeEditor extends React.Component {
             <MaterialButton text="pause" />
             <FAButton type="fa-twitter" />
             <FAButton contents="fa-twitter" />
-         
+
 
             <CodeSlider
                 sliderWasChanged={this.sliderWasChanged}
@@ -330,7 +360,7 @@ class CodeEditor extends React.Component {
 import { connect } from "react-redux";
 const mapStateToProps = (state, ownProps) => {
     console.log("Mappers state callback")
-	return {editorContents: state.editorContents }
+    return { editorContents: state.editorContents }
 }
 const mapDispatchToProps = (dispatch, ownProps) => {
     return {
