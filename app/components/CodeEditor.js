@@ -23,6 +23,8 @@ require("font-awesome-webpack")
 import FAButton from "./FAButton"
 require('codemirror/lib/codemirror.css');
 require('codemirror/addon/mode/simple');
+require('codemirror/addon/edit/closebrackets');
+require('codemirror/addon/edit/matchbrackets');
 require('codemirror/mode/javascript/javascript');
 require('codemirror/addon/mode/multiplex');
 require("codemirror/addon/dialog/dialog.css");
@@ -319,6 +321,8 @@ class CodeEditor extends React.Component {
             lineNumbers: true,
             mode: "changemode",
             keyMap: "sublime",
+            matchBrackets: true,
+            autoCloseBrackets: true,
             extraKeys: {
                 "Ctrl-Q": function (cm) {
                     cm.foldCode(cm.getCursor());
