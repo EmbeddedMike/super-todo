@@ -1,5 +1,116 @@
-# Code Editor
-CodeEditor improves development speed by minimizing wasted work, anticipating developer intents, and making code behavior visible.
+# Fast Develeoper
+Fast Develeoper improves development speed by minimizing wasted work, anticipating developer intents, and making code behavior visible.
+
+## Interface
+Fast Developer is an intelligent web application debugging tool that helps you 
+understand unfamiliar code (including code that you wrote a short time ago) 
+and edit code while you debug it. You can use
+it to add new code while you develop and test it. It can help you integrate changes to existing code,
+and write new code quickly. Fast Developer integrates with git and other development tools.
+
+Fast Developer includes:
+A syntax-colored debug viewer that doubles as an editor. It's got VIM, Sublime Text, Emacs and other editor bindings.
+A scrubber (slider) that lets you move forward and backward through a recorded 
+execution path.
+Run control buttons for navigating forward and backward through code, including step (forward and backward) over and in
+Customizable tools for displaying data values and their changes
+
+Fast Developer:
+Shows you what lines can be executed and lets you set and clear breakpoints.
+Shows you what lines have been executed, and how many times
+Makes it easy to show and hide lines that are of interest (or not)
+
+
+
+
+## Use cases
+Code Editor helps you write new code.
+It helps you modify code that you already understand.
+It helps you understand code that you didn't write or don't remember.
+
+Below are stories of the experience users will have using Fast Developer
+
+### Understanding a component
+You want to use or debug a component with insufficient documentation.
+
+Example: ReduxDev Tools includes an instrumentation component, and a 
+UI. You want to install the instrumentation, then interact
+with the user interface to see how it works.
+
+#### With a debugger
+I figured this out using a debugger. I started by setting a breakpoint at each function, so I could see the flow of control. As I understood what each function did, I removed the breakpoint.
+
+But there are problems. One is switching
+between the UI (needed to drive DevTools) and the debugger (needed to see what's going on) and
+between the time when the instrumentation runs and collects information
+and the time when I interact with the UI and the information is used.
+
+Moving from
+use-time to instrumentation-time meant I needed to reload the program. Moving from 
+instrumentation-time meant I had to repeat a sequence of UI operations.
+
+#### With Fast Developer
+1. Identify the module and reload; Fast Developer instruments the reloading process.
+2. Interact with the module. Fast Developer records what happens.
+3. Overview: Use the slider control to get a sense of how control flows through the program. You can
+slide forward or back. You can also use run control buttons. 
+4. By default, Fast Developer sets breakpoints at every function entry point.
+5. By default, Fast Developer removes the entry breakpoint once you've visited a function, 
+but not when you've slid by it
+6. When you visit a line that produces a result, Fast Developer shows you the resulting value.
+7. If the value is a complex structure, Fast Developer opens a viewer by default
+4. Fast Developer doesn't show you code as it is laid out in the file, but rather in execution order.
+5. When you invoke a function by sliding or stepping or hitting a breakpont
+within it, Fast Developer does not jump to that function--rather it opens the 
+function at the point of invocation
+6. Be default Fast Developer closes such a function as you leave.
+6. Any line you've visited is highlighted. You can clear highlights so you can identify lines
+lines visited since a point in time.
+7. Fast Developer annotates the slider bar with the functions you visit
+8. You can add your own annotations or remove the ones added automatically
+9. You can bookmark points on the slider bar, and jump back and forth between them
+10. You can identify sets of one or more variables or object members or functions as "of interest" 
+Fast Developer will skip over anything that's not in an at interest set
+
+
+## Some attributes
+1. The state of the application is captured in a `redux` store.
+2. The user interface is a pure function of the application store state.
+3. The application state changes only when `redux actions` are dispatched to the store.
+4. The store includes, in addition to the application store, a DevTools store. The DevTools store contains an copy of application store at a moment in time (we'll call this the  base state), copies of all the actions applied to the store since the base state, and copies of the application store state as each new action is applied to it.
+5. Modules can be edited, rebuilt, and hot-reloaded by WebPack.
+6. When a module is hot-reloaded, then by default the application store is returned to its base state, and all actions are re-applied to it automatically. This can be used for automatic regression testing.
+7. Most (eventually all) code modules can be copy-pasted from the editor into the Fast Developer
+8. When code in the Fast Developer changes, the Fast Developer calls on Babel to transform the code, and then executes the code
+9. Some constructs (for example imports, requires, and exports) that can be transformed by WebPack can't be transformed by Fast Developer. So Fast Developer strips them out, or changes them so that the remaining code can be translated.
+10. Some constructs (for example, initialization, some diagnostics, and some kinds of testing) need or want to be run only when code is translated by Fast Developer. this code is written so that it's guarded, and only executed in Fast Developer.
+
+### The connector
+1. A package called `connector` handles intermodule communication
+2. Each dynamically editable component imports `connector` 
+```
+  import connector {connected} from 'connector'
+```
+and ends with the statement: 
+```
+  connector.export(<modulename>, module)
+```
+3. The Fast Developer transformer wraps code in a function `(exported) => {<modified code>}` where the modified code has exports stripped out and imports rewritten as follows:
+Original:
+```
+import <modulename> from <path>
+import <modulename> {<variables>} from <path>
+```
+Rewritten:
+```
+let <modulename> = connected.<modulename>
+let <modulename> = connected.<modulame>.default
+let {<variables>} = <modulename>
+```
+Note: currently modulename must strictly equal the name that is used in the connector.export statement
+
+For now, the other import variants are not supported.
+
 
 ## The problem
 We write code by trial and error. Our trials may be informed by documentation and theory, but unless we write bug free code most of our trials have errors.
